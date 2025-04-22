@@ -152,6 +152,7 @@ IntelliJ IDEA 提供了对 GitHub 的内置支持，你可以直接在 IDEA 中�
 在 IDEA 右下角点击分支名，切换到你需要提交 PR 的功能分支（如 feature/new-feature）。
 推送分支到远程仓库：
 
+hello
 点击顶部菜单：Git -> Push。
 在弹出的窗口中，确保分支被推送到远程仓库。
 打开 Pull Request 界面：
