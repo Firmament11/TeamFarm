@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>物资管理 - 智慧农场小程序</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="components/unified-header.html"></script>
+    <script src="components/unified-footer.html"></script>
+    <style>
+        /* 页面特定样式 */
+        .tab-active {
+            color: #07c160;
+            border-bottom: 2px solid #07c160;
+        }
+        .status-low {
+            color: #ff3b30;
+        }
+        .status-medium {
+            color: #ff9800;
+        }
+        .status-high {
+            color: #07c160;
+        }
+        .inventory-card {
+            transition: all 0.3s ease;
+        }
+        .inventory-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .progress-bar {
+            height: 6px;
+            border-radius: 3px;
+            background-color: #e5e5e5;
+            overflow: hidden;
+        }
+        .progress-value {
+            height: 100%;
+            border-radius: 3px;
+        }
+        .progress-value-low {
+            background-color: #ff3b30;
+        }
+        .progress-value-medium {
+            background-color: #ff9800;
+        }
+        .progress-value-high {
+            background-color: #07c160;
+        }
+        .animated-icon {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 120px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            background-color: #07c160;
+            color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            transform: translateX(200%);
+            transition: transform 0.5s ease;
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-red {
+            background-color: #fee2e2;
+            color: #ef4444;
+        }
+        .badge-yellow {
+            background-color: #fef3c7;
+            color: #f59e0b;
+        }
+        .badge-green {
+            background-color: #d1fae5;
+            color: #10b981;
+        }
+        .badge-blue {
+            background-color: #dbeafe;
+            color: #3b82f6;
+        }
+        .badge-purple {
+            background-color: #ede9fe;
+            color: #8b5cf6;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #07c160;
+            box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.2);
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #4b5563;
+        }
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(7, 193, 96, 0.3);
+            border-radius: 50%;
+            border-top-color: #07c160;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .search-input {
+            transition: all 0.3s ease;
+        }
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.2);
+        }
+    </style>
+</head>
+<body class="safe-area" style="max-width: 414px; margin: 0 auto; position: relative; min-height: 100vh;">
+    <!-- 引入统一顶部导航栏 -->
+    <div id="header-container"></div>
+
+    <!-- 通知提示 -->
+    <div class="notification" id="notification-popup">
+        <div class="flex items-center">
+            <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <span id="notification-text">操作成功</span>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <main class="pb-16">
+        <!-- 功能标签页 -->
+        <div class="bg-white">
+            <div class="flex border-b">
+                <button class="flex-1 py-3 text-center text-sm tab-active" id="inventory-tab">库存</button>
+                <button class="flex-1 py-3 text-center text-sm text-gray-500" id="purchase-tab">采购</button>
+                <button class="flex-1 py-3 text-center text-sm text-gray-500" id="sales-tab">销售</button>
+            </div>
+        </div>
+
+        <!-- 搜索框 -->
+        <div class="p-4 bg-white border-b">
+            <div class="relative">
+                <input type="text" class="w-full p-2 pl-10 pr-4 border border-gray-300 rounded-lg search-input" placeholder="搜索物资名称、编号" id="search-input">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <button class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400" id="clear-search">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- 库存概览 -->
+        <div class="p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-bold">库存概览</h2>
+                <button class="text-sm text-green-600 flex items-center" id="refresh-btn">
+                    <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    刷新
+                </button>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+                <div class="inventory-card bg-white rounded-lg shadow p-3 text-center">
+                    <div class="text-sm text-gray-500">物资种类</div>
+                    <div class="text-xl font-bold">24</div>
+                    <div class="text-xs text-green-600 mt-1">较上月 +3</div>
+                </div>
+                <div class="inventory-card bg-white rounded-lg shadow p-3 text-center">
+                    <div class="text-sm text-gray-500">库存总量</div>
+                    <div class="text-xl font-bold">1,256</div>
+                    <div class="text-xs text-green-600 mt-1">较上月 +120</div>
+                </div>
+                <div class="inventory-card bg-white rounded-lg shadow p-3 text-center">
+                    <div class="text-sm text-gray-500">库存金额</div>
+                    <div class="text-xl font-bold">¥25,680</div>
+                    <div class="text-xs text-red-600 mt-1">较上月 -¥1,200</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 库存状态图表 -->
+        <div class="p-4">
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="font-medium mb-3">库存状态分布</h3>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-red-500 mr-1"></span>
+                        <span class="text-xs text-gray-500 mr-3">低库存 (15%)</span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500 mr-1"></span>
+                        <span class="text-xs text-gray-500 mr-3">中库存 (25%)</span>
+                        <span class="w-3 h-3 rounded-full bg-green-500 mr-1"></span>
+                        <span class="text-xs text-gray-500">高库存 (60%)</span>
+                    </div>
+                </div>
+                <div class="h-6 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="flex h-full">
+                        <div class="bg-red-500 h-full" style="width: 15%"></div>
+                        <div class="bg-yellow-500 h-full" style="width: 25%"></div>
+                        <div class="bg-green-500 h-full" style="width: 60%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 库存预警 -->
+        <div class="p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-bold">库存预警</h2>
+                <span class="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full animate__animated animate__pulse animate__infinite">3项需补充</span>
+            </div>
+            <div class="bg-white rounded-lg shadow divide-y">
+                <div class="p-3 flex items-center">
+                    <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center mr-3">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-medium">复合肥料</h3>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-500">库存: 5袋</span>
+                            <span class="text-sm status-low">低于警戒线</span>
+                        </div>
+                        <div class="mt-1 progress-bar">
+                            <div class="progress-value progress-value-low" style="width: 15%"></div>
+                        </div>
+                    </div>
+                    <button class="px-3 py-1 text-sm bg-green-500 text-white rounded-lg ml-3">补充</button>
+                </div>
+                <div class="p-3 flex items-center">
+                    <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center mr-3">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-medium">农药</h3>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-500">库存: 2瓶</span>
+                            <span class="text-sm status-low">低于警戒线</span>
+                        </div>
+                        <div class="mt-1 progress-bar">
+                            <div class="progress-value progress-value-low" style="width: 10%"></div>
+                        </div>
+                    </div>
+                    <button class="px-3 py-1 text-sm bg-green-500 text-white rounded-lg ml-3">补充</button>
+                </div>
+                <div class="p-3 flex items-center">
+                    <div class="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center mr-3">
+                        <svg class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-medium">种子</h3>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-500">库存: 15包</span>
+                            <span class="text-sm status-medium">接近警戒线</span>
+                        </div>
+                        <div class="mt-1 progress-bar">
+                            <div class="progress-value progress-value-medium" style="width: 30%"></div>
+                        </div>
+                    </div>
+                    <button class="px-3 py-1 text-sm bg-green-500 text-white rounded-lg ml-3">补充</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 库存列表 -->
+        <div class="p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-bold">库存列表</h2>
+                <button class="px-3 py-1 text-sm bg-green-500 text-white rounded-lg flex items-center" id="add-inventory-btn">
+                    <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    添加物资
+                </button>
+            </div>
+            <div class="bg-white rounded-lg shadow">
+                <!-- 分类筛选 -->
+                <div class="p-3 border-b">
+                    <div class="flex space-x-2 overflow-x-auto pb-2">
+                        <button class="px-3 py-1 text-sm bg-green-500 text-white rounded-lg whitespace-nowrap">全部</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-lg whitespace-nowrap">肥料</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-lg whitespace-nowrap">农药</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-lg whitespace-nowrap">种子</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-lg whitespace-nowrap">工具</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-lg whitespace-nowrap">其他</button>
+                    </div>
+                </div>
+                
+                <!-- 列表内容 -->
+                <div class="divide-y">
+                    <div class="p-3 flex items-center inventory-card">
+                        <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center mr-3">
+                            <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <h3 class="font-medium">有机肥料</h3>
+                                <span class="ml-2 badge badge-green">肥料</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">编号: F-2023-001</span>
+                                <span class="text-sm status-high">库存充足</span>
+                            </div>
+                            <div class="mt-1 progress-bar">
+                                <div class="progress-value progress-value-high" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div class="text-right ml-3">
+                            <div class="font-medium">50袋</div>
+                            <div class="text-sm text-gray-500">¥2,500</div>
+                        </div>
+                    </div>
+                    <div class="p-3 flex items-center inventory-card">
+                        <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
+                            <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <h3 class="font-medium">除草剂</h3>
+                                <span class="ml-2 badge badge-blue">农药</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">编号: P-2023-002</span>
+                                <span class="text-sm status-medium">库存一般</span>
+                            </div>
+                            <div class="mt-1 progress-bar">
+                                <div class="progress-value progress-value-medium" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        <div class="text-right ml-3">
+                            <div class="font-medium">20瓶</div>
+                            <div class="text-sm text-gray-500">¥1,800</div>
+                        </div>
+                    </div>
+                    <div class="p-3 flex items-center inventory-card">
+                        <div class="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center mr-3">
+                            <svg class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012 2v2.945"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <h3 class="font-medium">稻种</h3>
+                                <span class="ml-2 badge badge-yellow">种子</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">编号: S-2023-003</span>
+                                <span class="text-sm status-medium">接近警戒线</span>
+                            </div>
+                            <div class="mt-1 progress-bar">
+                                <div class="progress-value progress-value-medium" style="width: 35%"></div>
+                            </div>
+                        </div>
+                        <div class="text-right ml-3">
+                            <div class="font-medium">15包</div>
+                            <div class="text-sm text-gray-500">¥1,200</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 引入统一底部导航栏 -->
+    <div id="footer-container"></div>
+    
+    <script src="js/unified-app.js"></script>
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载统一头部
+            fetch('components/unified-header.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('header-container').innerHTML = data;
+                });
+            
+            // 加载统一底部
+            fetch('components/unified-footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('footer-container').innerHTML = data;
+                });
+            
+            // 设置页面标题
+            document.getElementById('page-title').textContent = '物资管理';
+            
+            // 根据当前页面URL设置活动导航项
+            const currentPath = window.location.pathname;
+            const filename = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+            
+            // 移除所有导航项的active类
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.nav-icon').classList.remove('text-green-500');
+                item.querySelector('span').classList.remove('text-green-500');
+            });
+            
+            // 根据当前页面设置活动导航项
+            let activeNavId = null;
+            
+            if (filename === 'home.html' || filename === '') {
+                activeNavId = 'nav-home';
+            } else if (filename.includes('farm-monitor') || filename.includes('farm-video-monitor')) {
+                activeNavId = 'nav-monitor';
+            } else if (filename.includes('task')) {
+                activeNavId = 'nav-task';
+            } else if (filename.includes('data-analysis')) {
+                activeNavId = 'nav-analysis';
+            } else if (filename.includes('inventory')) {
+                activeNavId = 'nav-task'; // 假设物资管理属于任务类别
+            } else if (filename.includes('profile')) {
+                activeNavId = 'nav-profile';
+            }
+            
+            if (activeNavId) {
+                const activeNav = document.getElementById(activeNavId);
+                if (activeNav) {
+                    activeNav.classList.add('active');
+                    activeNav.querySelector('.nav-icon').classList.add('text-green-500');
+                    activeNav.querySelector('span').classList.add('text-green-500');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

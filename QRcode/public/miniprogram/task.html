@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>任务管理 - 智慧农场小程序</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <style>
+        /* 页面特定样式 */
+        .status-urgent {
+            color: #ff3b30;
+        }
+        .status-normal {
+            color: #007aff;
+        }
+        .status-completed {
+            color: #8e8e93;
+        }
+        
+        /* 任务项动画和交互效果 */
+        .task-item {
+            transition: all 0.3s ease;
+        }
+        
+        .task-item:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .task-complete-animation {
+            animation: taskComplete 1s ease;
+        }
+        
+        @keyframes taskComplete {
+            0% { background-color: rgba(7, 193, 96, 0); }
+            50% { background-color: rgba(7, 193, 96, 0.2); }
+            100% { background-color: rgba(7, 193, 96, 0); }
+        }
+        
+        /* 创建任务按钮动画 */
+        .create-task-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .create-task-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(7, 193, 96, 0.3);
+        }
+        
+        .create-task-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* 标签页切换动画 */
+        .tab-active {
+            color: #07c160;
+            border-bottom: 2px solid #07c160;
+            transition: all 0.3s ease;
+        }
+        
+        /* 任务卡片动画 */
+        .staggered-item {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .staggered-item.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 任务优先级标签样式增强 */
+        .text-xs.px-2.py-1.rounded-full {
+            transition: all 0.3s ease;
+        }
+        
+        /* 响应式优化 */
+        @media (max-width: 640px) {
+            .grid.grid-cols-3 {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+            }
+            
+            .text-xl.font-bold {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body class="safe-area" style="max-width: 414px; margin: 0 auto; position: relative; min-height: 100vh;">
+    <!-- 统一顶部导航栏 -->
+    <script src="components/unified-header.html"></script>
+    <!-- 引入统一顶部导航栏 -->
+    <div id="header-container"></div>
+
+    <!-- 主要内容区域 -->
+    <main class="pb-16">
+        <!-- 功能标签页 -->
+        <div class="bg-white">
+            <div class="flex border-b">
+                <button class="flex-1 py-3 text-center text-sm tab-active">全部任务</button>
+                <button class="flex-1 py-3 text-center text-sm text-gray-500">我的任务</button>
+                <button class="flex-1 py-3 text-center text-sm text-gray-500">已完成</button>
+            </div>
+        </div>
+
+        <!-- 搜索框 -->
+        <div class="p-4 bg-white border-b">
+            <div class="relative">
+                <input type="text" class="w-full p-2 pl-10 pr-4 border border-gray-300 rounded-lg" placeholder="搜索任务名称、负责人">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务统计 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">任务统计</h2>
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-white rounded-lg shadow p-3 text-center">
+                    <div class="text-sm text-gray-500">总任务</div>
+                    <div class="text-xl font-bold">18</div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-3 text-center">
+                    <div class="text-sm text-gray-500">进行中</div>
+                    <div class="text-xl font-bold text-blue-500">12</div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-3 text-center">
+                    <div class="text-sm text-gray-500">已完成</div>
+                    <div class="text-xl font-bold text-green-500">6</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 今日任务 -->
+        <div class="p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-bold">今日任务</h2>
+                <span class="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full">3项待完成</span>
+            </div>
+            <div class="bg-white rounded-lg shadow divide-y">
+                <div class="p-3">
+                    <div class="flex items-center mb-2">
+                        <input type="checkbox" class="h-5 w-5 text-green-500 rounded mr-3">
+                        <div class="flex-1">
+                            <h3 class="font-medium">西区水稻田浇水</h3>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full">紧急</span>
+                    </div>
+                    <div class="pl-8">
+                        <div class="flex justify-between text-sm text-gray-500 mb-2">
+                            <span>时间: 09:00 - 10:00</span>
+                            <span>负责人: 张三</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <div class="flex items-center text-xs text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>西区水稻田</span>
+                            </div>
+                            <button class="text-xs text-blue-500" onclick="window.location.href='task-detail.html'">查看详情</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <div class="flex items-center mb-2">
+                        <input type="checkbox" class="h-5 w-5 text-green-500 rounded mr-3">
+                        <div class="flex-1">
+                            <h3 class="font-medium">东区蔬菜大棚施肥</h3>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">普通</span>
+                    </div>
+                    <div class="pl-8">
+                        <div class="flex justify-between text-sm text-gray-500 mb-2">
+                            <span>时间: 14:00 - 15:00</span>
+                            <span>负责人: 李四</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <div class="flex items-center text-xs text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>东区蔬菜大棚</span>
+                            </div>
+                            <button class="text-xs text-blue-500" onclick="window.location.href='task-detail.html'">查看详情</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <div class="flex items-center mb-2">
+                        <input type="checkbox" class="h-5 w-5 text-green-500 rounded mr-3" checked>
+                        <div class="flex-1">
+                            <h3 class="font-medium line-through text-gray-400">南区果园巡检</h3>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full">已完成</span>
+                    </div>
+                    <div class="pl-8">
+                        <div class="flex justify-between text-sm text-gray-400 mb-2">
+                            <span>时间: 08:00 - 09:00</span>
+                            <span>负责人: 王五</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <div class="flex items-center text-xs text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>南区果园</span>
+                            </div>
+                            <button class="text-xs text-blue-500" onclick="window.location.href='task-detail.html'">查看详情</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 未来任务 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">未来任务</h2>
+            <div class="bg-white rounded-lg shadow divide-y">
+                <div class="p-3">
+                    <div class="flex items-center mb-2">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-blue-600 font-medium">明天</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-medium">北区试验田数据采集</h3>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">09:00 - 11:00</span>
+                                <span class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">普通</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <div class="flex items-center mb-2">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-blue-600 font-medium">明天</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-medium">西区水稻田病虫害防治</h3>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">14:00 - 16:00</span>
+                                <span class="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full">紧急</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <div class="flex items-center mb-2">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-purple-600 font-medium">周五</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-medium">农资盘点</h3>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">全天</span>
+                                <span class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">普通</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务分配 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">任务分配</h2>
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="mb-4">
+                    <h3 class="font-medium mb-2">人员任务分配</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>张三</span>
+                                <span>5项任务</span>
+                            </div>
+                            <div class="h-2 bg-gray-200 rounded-full">
+                                <div class="h-2 bg-green-500 rounded-full" style="width: 60%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>李四</span>
+                                <span>3项任务</span>
+                            </div>
+                            <div class="h-2 bg-gray-200 rounded-full">
+                                <div class="h-2 bg-green-500 rounded-full" style="width: 40%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>王五</span>
+                                <span>7项任务</span>
+                            </div>
+                            <div class="h-2 bg-gray-200 rounded-full">
+                                <div class="h-2 bg-red-500 rounded-full" style="width: 85%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>赵六</span>
+                                <span>2项任务</span>
+                            </div>
+                            <div class="h-2 bg-gray-200 rounded-full">
+                                <div class="h-2 bg-green-500 rounded-full" style="width: 25%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-medium mb-2">区域任务分布</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-gray-100 p-3 rounded-lg">
+                            <div class="text-sm font-medium">西区水稻田</div>
+                            <div class="text-xl font-bold">5</div>
+                            <div class="text-xs text-gray-500">任务数量</div>
+                        </div>
+                        <div class="bg-gray-100 p-3 rounded-lg">
+                            <div class="text-sm font-medium">东区蔬菜大棚</div>
+                            <div class="text-xl font-bold">4</div>
+                            <div class="text-xs text-gray-500">任务数量</div>
+                        </div>
+                        <div class="bg-gray-100 p-3 rounded-lg">
+                            <div class="text-sm font-medium">南区果园</div>
+                            <div class="text-xl font-bold">6</div>
+                            <div class="text-xs text-gray-500">任务数量</div>
+                        </div>
+                        <div class="bg-gray-100 p-3 rounded-lg">
+                            <div class="text-sm font-medium">北区试验田</div>
+                            <div class="text-xl font-bold">3</div>
+                            <div class="text-xs text-gray-500">任务数量</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快捷操作 -->
+        <div class="p-4">
+            <button class="w-full py-3 bg-green-500 text-white rounded-lg font-medium flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <span>创建新任务</span>
+            </button>
+        </div>
+    </main>
+
+    <!-- 引入统一底部导航栏 -->
+    <div id="footer-container"></div>
+
+    <!-- JavaScript -->
+    <script src="js/unified-app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载统一头部
+            fetch('components/unified-header.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('header-container').innerHTML = data;
+                    // 设置页面标题
+                    setTimeout(() => {
+                        const pageTitle = document.getElementById('page-title');
+                        if (pageTitle) pageTitle.textContent = '任务管理';
+                    }, 100);
+                });
+            
+            // 加载统一底部
+            fetch('components/unified-footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('footer-container').innerHTML = data;
+                    // 设置当前导航项为活动状态
+                    setTimeout(() => {
+                        const taskNav = document.getElementById('nav-task');
+                        if (taskNav) taskNav.classList.add('active');
+                    }, 100);
+                });
+
+            // 为所有任务项添加任务项类
+            document.querySelectorAll('.p-3').forEach(item => {
+                item.classList.add('task-item');
+            });
+
+            // 为任务项添加动画效果
+            document.querySelectorAll('.task-item').forEach((item, index) => {
+                item.classList.add('staggered-item');
+                setTimeout(() => {
+                    item.classList.add('show');
+                }, 100 + (index * 100));
+            });
+
+            // 为任务复选框添加交互效果
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const taskItem = this.closest('.task-item');
+                    const taskTitle = taskItem.querySelector('h3');
+                    const taskStatus = taskItem.querySelector('span:last-child');
+                    
+                    if (this.checked) {
+                        // 添加完成样式
+                        taskTitle.classList.add('line-through', 'text-gray-400');
+                        taskItem.classList.add('completed');
+                        
+                        // 更新任务状态标签
+                        if (taskStatus) {
+                            taskStatus.textContent = '已完成';
+                            taskStatus.className = 'text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full';
+                        }
+                        
+                        // 添加完成动画
+                        taskItem.classList.add('task-complete-animation');
+                        setTimeout(() => {
+                            taskItem.classList.remove('task-complete-animation');
+                        }, 1000);
+                        
+                        // 显示成功通知
+                        if (window.showNotification) {
+                            window.showNotification('任务已完成', 'success');
+                        }
+                    } else {
+                        // 移除完成样式
+                        taskTitle.classList.remove('line-through', 'text-gray-400');
+                        taskItem.classList.remove('completed');
+                        
+                        // 恢复任务状态标签
+                        if (taskStatus) {
+                            // 根据原始状态恢复标签
+                            if (taskItem.querySelector('.status-urgent')) {
+                                taskStatus.textContent = '紧急';
+                                taskStatus.className = 'text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full';
+                            } else {
+                                taskStatus.textContent = '普通';
+                                taskStatus.className = 'text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full';
+                            }
+                        }
+                        
+                        // 显示通知
+                        if (window.showNotification) {
+                            window.showNotification('任务已恢复', 'info');
+                        }
+                    }
+                    
+                    // 更新任务统计数据
+                    updateTaskStats();
+                });
+            });
+
+            // 为标签页添加交互效果
+            document.querySelectorAll('.flex.border-b button').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // 移除所有标签的活动状态
+                    document.querySelectorAll('.flex.border-b button').forEach(t => {
+                        t.classList.remove('tab-active');
+                        t.classList.add('text-gray-500');
+                    });
+                    
+                    // 为当前点击的标签添加活动状态
+                    this.classList.add('tab-active');
+                    this.classList.remove('text-gray-500');
+                    
+                    // 过滤任务列表
+                    filterTasks(this.textContent.trim());
+                    
+                    // 显示成功通知
+                    if (window.showNotification) {
+                        window.showNotification('切换到' + this.textContent + '视图', 'info');
+                    }
+                });
+            });
+            
+            // 为创建新任务按钮添加动画效果
+            const createTaskBtn = document.querySelector('.w-full.py-3.bg-green-500');
+            if (createTaskBtn) {
+                createTaskBtn.classList.add('create-task-btn', 'hover:shadow-lg', 'transform', 'transition');
+                createTaskBtn.addEventListener('click', function() {
+                    window.location.href = 'create-task.html';
+                });
+            }
+            
+            // 为搜索框添加功能
+            const searchInput = document.querySelector('input[placeholder="搜索任务名称、负责人"]');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    searchTasks(searchTerm);
+                });
+            }
+            
+            // 初始化任务统计
+            updateTaskStats();
+        });
+        
+        // 过滤任务列表
+        function filterTasks(filterType) {
+            const allTasks = document.querySelectorAll('.task-item');
+            
+            allTasks.forEach(task => {
+                // 默认显示所有任务
+                task.style.display = 'block';
+                
+                // 根据过滤类型隐藏不符合条件的任务
+                if (filterType === '我的任务') {
+                    // 假设当前用户是张三，只显示张三的任务
+                    const assignee = task.querySelector('.text-sm.text-gray-500, .text-sm.text-gray-400');
+                    if (assignee && !assignee.textContent.includes('张三')) {
+                        task.style.display = 'none';
+                    }
+                } else if (filterType === '已完成') {
+                    // 只显示已完成的任务
+                    const checkbox = task.querySelector('input[type="checkbox"]');
+                    if (checkbox && !checkbox.checked) {
+                        task.style.display = 'none';
+                    }
+                }
+            });
+            
+            // 添加过滤动画效果
+            allTasks.forEach((task, index) => {
+                if (task.style.display !== 'none') {
+                    task.classList.add('fade-in');
+                    setTimeout(() => {
+                        task.classList.remove('fade-in');
+                    }, 500);
+                }
+            });
+        }
+        
+        // 搜索功能
+        function searchTasks(searchTerm) {
+            const allTasks = document.querySelectorAll('.task-item');
+            
+            allTasks.forEach(task => {
+                const taskText = task.textContent.toLowerCase();
+                if (taskText.includes(searchTerm)) {
+                    task.style.display = 'block';
+                } else {
+                    task.style.display = 'none';
+                }
+            });
+        }
+        
+        // 更新任务统计
+        function updateTaskStats() {
+            const totalTasks = document.querySelectorAll('.task-item').length;
+            const completedTasks = document.querySelectorAll('input[type="checkbox"]:checked').length;
+            const inProgressTasks = totalTasks - completedTasks;
+            
+            // 更新统计数字
+            const statsElements = document.querySelectorAll('.grid.grid-cols-3 .text-xl.font-bold');
+            if (statsElements.length >= 3) {
+                statsElements[0].textContent = totalTasks;
+                statsElements[1].textContent = inProgressTasks;
+                statsElements[2].textContent = completedTasks;
+            }
+            
+            // 更新今日任务待完成数量
+            const todayTasksCounter = document.querySelector('.flex.justify-between.items-center.mb-3 span');
+            if (todayTasksCounter) {
+                const todayTasks = document.querySelectorAll('.p-4:nth-of-type(3) .task-item').length;
+                const todayCompletedTasks = document.querySelectorAll('.p-4:nth-of-type(3) input[type="checkbox"]:checked').length;
+                const todayPendingTasks = todayTasks - todayCompletedTasks;
+                todayTasksCounter.textContent = todayPendingTasks + '项待完成';
+            }
+        }
+    </script>
+    <!-- 统一底部导航栏 -->
+    <script src="components/unified-footer.html"></script>
+</body>
+</html>

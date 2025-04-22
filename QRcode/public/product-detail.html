@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>农产品溯源详情</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- 引入高德地图API -->
+    <script src="https://webapi.amap.com/loader.js"></script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .bg-pattern {
+            background-color: #f0f8f0;
+            background-image: linear-gradient(rgba(144, 238, 144, 0.1) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(144, 238, 144, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .certificate {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="%232c8c3c" stroke-width="2" stroke-dasharray="5,5"/><path d="M30,50 L45,65 L70,35" fill="none" stroke="%232c8c3c" stroke-width="3"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 100px 100px;
+        }
+        .plant-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+        }
+        .plant-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+        .plant-icon rect {
+            fill: #4CAF50;
+        }
+        .plant-icon path {
+            fill: #2E7D32;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background-color: #E0E0E0;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -30px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            z-index: 1;
+        }
+        .timeline-content {
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 优化后的动画样式 */
+        .animate-grow {
+            animation: grow 4s forwards;
+        }
+
+        @keyframes grow {
+            0% {
+                .seed {
+                    opacity: 0;
+                }
+                .stem {
+                    height: 0;
+                    y: 80;
+                }
+                .leaf {
+                    opacity: 0;
+                }
+                .flower {
+                    r: 0;
+                }
+                .fruit {
+                    r: 0;
+                }
+            }
+            25% {
+                .seed {
+                    opacity: 1;
+                }
+            }
+            50% {
+                .stem {
+                    height: 50;
+                    y: 30;
+                }
+            }
+            60% {
+                .leaf1, .leaf2 {
+                    opacity: 1;
+                }
+            }
+            70% {
+                .leaf3, .leaf4 {
+                    opacity: 1;
+                }
+            }
+            85% {
+                .flower {
+                    r: 10;
+                }
+            }
+            100% {
+                .fruit {
+                    r: 8;
+                }
+            }
+        }
+
+        /* 视频样式 */
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 比例 */
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .play-button:hover {
+            opacity: 1;
+        }
+
+        .play-button svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .fullscreen-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .fullscreen-button:hover {
+            opacity: 1;
+        }
+
+        /* 地图样式 */
+        .map-container {
+            width: 100%;
+            height: 250px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .video-container {
+                padding-bottom: 75%; /* 4:3 比例更适合手机 */
+            }
+            
+            .map-container {
+                height: 200px;
+            }
+        }
+
+        /* 装饰元素 */
+        .decoration {
+            position: fixed;
+            opacity: 0.1;
+        }
+
+        .leaf-decoration {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+        }
+
+        .leaf-1 {
+            top: 10%;
+            right: 5%;
+            transform: rotate(20deg);
+        }
+
+        .leaf-2 {
+            bottom: 20%;
+            left: 5%;
+            transform: rotate(-15deg);
+        }
+
+        .grass-decoration {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 50px;
+            background-image: linear-gradient(rgba(76, 175, 80, 0.1) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(76, 175, 80, 0.1) 1px, transparent 1px);
+            background-size: 10px 10px;
+        }
+
+        .sun-decoration {
+            position: absolute;
+            top: 5%;
+            left: 5%;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, rgba(255,215,0,0) 70%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 装饰元素 -->
+    <div class="decoration sun-decoration"></div>
+    <div class="decoration leaf-decoration leaf-1">
+        <svg viewBox="0 0 100 100">
+            <path d="M50,60 L35,50 L50,40 L65,50 Z" fill="#4CAF50" />
+        </svg>
+    </div>
+    <div class="decoration leaf-decoration leaf-2">
+        <svg viewBox="0 0 100 100">
+            <path d="M50,60 L35,50 L50,40 L65,50 Z" fill="#8BC34A" />
+        </svg>
+    </div>
+    <div class="decoration grass-decoration"></div>
+
+    <div id="app" class="container mx-auto px-4 py-8">
+        <!-- 导航栏 -->
+        <nav class="bg-white shadow-md p-4 rounded-lg mb-8">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-green-700">智慧农场溯源系统</span>
+                </div>
+                <div class="flex space-x-4">
+                    <button @click="copyProductInfoAndRedirect" class="text-green-600 hover:text-green-800">唤起AI</button>
+                    <a href="hello.html" class="text-green-600 hover:text-green-800">进入首页</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 主要内容 -->
+        <div class="main-content">
+            <div class="container mx-auto px-4">
+                <!-- 产品信息卡片 -->
+                <div v-if="productInfo" class="bg-white rounded-lg shadow-md p-4 sm:p-8 mb-8 fade-in">
+                    <div class="flex justify-between items-start mb-6">
+                        <h2 class="text-2xl font-bold text-green-700">农产品溯源信息</h2>
+                        <div class="certificate w-20 h-20"></div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- 产品基本信息 -->
+                        <div class="space-y-6 fade-in">
+                            <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                                <h3 class="text-lg font-semibold text-green-700 mb-3">产品基本信息</h3>
+                                <div class="space-y-2">
+                                    <p class="flex justify-between">
+                                        <span class="font-medium text-gray-600">产品名称:</span>
+                                        <span class="text-gray-800">{{ productInfo.productName }}</span>
+                                    </p>
+                                    <p v-if="productInfo.location" class="flex justify-between">
+                                        <span class="font-medium text-gray-600">种植地点:</span>
+                                        <span class="text-gray-800">{{ productInfo.location }}</span>
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                                <h3 class="text-lg font-semibold text-blue-700 mb-3">时间信息</h3>
+                                <div class="space-y-2">
+                                    <p v-if="productInfo.plantingDate" class="flex justify-between">
+                                        <span class="font-medium text-gray-600">种植时间:</span>
+                                        <span class="text-gray-800">{{ formatDate(productInfo.plantingDate) }}</span>
+                                    </p>
+                                    <p v-if="productInfo.harvestDate" class="flex justify-between">
+                                        <span class="font-medium text-gray-600">收获时间:</span>
+                                        <span class="text-gray-800">{{ formatDate(productInfo.harvestDate) }}</span>
+                                    </p>
+                                    <p v-if="productInfo.harvestDate && daysAfterHarvest > 0" class="flex justify-between">
+                                        <span class="font-medium text-gray-600">已收获天数:</span>
+                                        <span class="text-gray-800">{{ daysAfterHarvest }} 天</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 种植详情 -->
+                        <div class="space-y-6 fade-in">
+                            <div class="bg-white p-4 rounded-lg shadow mb-4">
+                                <h3 class="text-lg font-semibold text-gray-700 mb-3">营养成分分析</h3>
+                                <canvas id="nutritionChart" height="200"></canvas>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow mb-4">
+                                <h3 class="text-lg font-semibold text-gray-700 mb-3">种植过程时间线</h3>
+                                <div class="timeline">
+                                    <div class="timeline-item" v-if="productInfo.plantingDate">
+                                        <div class="timeline-dot">🌱</div>
+                                        <div class="timeline-content">
+                                            <p class="font-medium">种植开始</p>
+                                            <p class="text-sm text-gray-500">{{ formatDate(productInfo.plantingDate) }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item" v-if="productInfo.harvestDate">
+                                        <div class="timeline-dot">🌾</div>
+                                        <div class="timeline-content">
+                                            <p class="font-medium">收获完成</p>
+                                            <p class="text-sm text-gray-500">{{ formatDate(productInfo.harvestDate) }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 视频展示模块 -->
+                            <div class="mt-4">
+                                <h3 class="text-lg font-semibold text-gray-700 mb-3">产品展示视频</h3>
+                                <div v-if="productInfo.videoUrl" class="video-container">
+                                    <iframe ref="videoIframe" :src="videoEmbedUrl" frameborder="0" allowfullscreen></iframe>
+                                    
+                                </div>
+                                <div v-else class="video-container">
+                                    <iframe src="https://player.bilibili.com/player.html?bvid=BV16G411y77W&high_quality=1&danmaku=0" frameborder="0" allowfullscreen></iframe>
+                                </div>
+                            </div>
+                            
+                            <!-- 精确位置地图 -->
+                            <div v-if="productInfo.exactLocation" class="mt-4">
+                                <h3 class="text-lg font-semibold text-gray-700 mb-3">精确种植位置</h3>
+                                <div class="relative">
+                                    <div id="detail-map" class="map-container"></div>
+                                    <div class="absolute bottom-2 right-2">
+                                        <button @click="openFullMap" class="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors duration-300">
+                                            <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-gray-500 mt-2">{{ productInfo.exactLocation.address }}</p>
+                            </div>
+
+                            <div v-if="productInfo.fertilizer" class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
+                                <h3 class="text-lg font-semibold text-yellow-700 mb-3">施肥记录</h3>
+                                <p class="text-gray-700 whitespace-pre-line">{{ productInfo.fertilizer }}</p>
+                            </div>
+                            
+                            <div v-if="productInfo.pesticide" class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                                <h3 class="text-lg font-semibold text-red-700 mb-3">农药使用</h3>
+                                <p class="text-gray-700 whitespace-pre-line">{{ productInfo.pesticide }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <!-- 公司信息 -->
+                    <div class="mt-10 p-6 bg-blue-700 text-white rounded-lg shadow-lg fade-in">
+                        <h3 class="text-xl font-bold mb-4">生产企业信息</h3>
+                        <div class="flex flex-col md:flex-row justify-between items-center">
+                            <div>
+                                <p class="mb-2 text-lg font-bold">{{ productInfo.companyName || '黑土地农场' }}</p>
+                                <p class="mb-2">带派奥老铁</p>
+                            </div>
+                            <div class="mt-4 md:mt-0">
+                                <p class="mb-2">公司网站: <a href="http://www.baidu.com" target="_blank" class="underline">www.baidu.com</a></p>
+                                <p>联系电话: {{ productInfo.contact || '10086' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 加载中或错误提示 -->
+                <div v-else class="bg-white rounded-lg shadow-md p-8 text-center">
+                    <div v-if="loading" class="py-10">
+                        <svg class="animate-spin h-10 w-10 text-green-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="mt-4 text-gray-600">正在加载产品信息...</p>
+                    </div>
+                    <div v-else class="py-10">
+                        <svg class="h-16 w-16 text-red-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p class="mt-4 text-gray-600">无法加载产品信息，请确认您的溯源码是否有效</p>
+                        <a href="index.html" class="mt-4 inline-block bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">返回首页</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="bg-green-800 text-white p-8 mt-8 rounded-lg">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div>
+                        <h3 class="text-xl font-bold">智慧农场</h3>
+                        <br>
+                        <p>你看到的，就是未来</p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <p>公司网站: <a href="http://www.hl3344.space" target="_blank" class="underline">www.hl3344.space</a></p>
+                        <p>联系电话: 1862483344</p>
+                    </div>
+                </div>
+                <div class="mt-8 text-center">
+                    <p>© 2025 智慧农场. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                productInfo: null,
+                loading: true,
+                nutritionChart: null,
+                detailMap: null,
+                detailMarker: null,
+                defaultVideoUrl: 'https://www.bilibili.com/video/BV16G411y77W/?share_source=copy_web&vd_source=5e78d91e42090a493ed7ddf7f5f3b755'
+            },
+            computed: {
+                // 获取视频嵌入URL
+                videoEmbedUrl() {
+                    if (!this.productInfo || !this.productInfo.videoUrl) return '';
+                    
+                    let url = this.productInfo.videoUrl;
+                    
+                    // 处理B站视频
+                    if (url.includes('bilibili.com')) {
+                        // 提取BV号
+                        const bvMatch = url.match(/BV\w+/);
+                        if (bvMatch) {
+                            return `https://player.bilibili.com/player.html?bvid=${bvMatch[0]}&high_quality=1&danmaku=0`;
+                        }
+                    }
+                    
+                    // 处理优酷视频
+                    if (url.includes('youku.com')) {
+                        const idMatch = url.match(/id_(\w+)/);
+                        if (idMatch) {
+                            return `https://player.youku.com/embed/${idMatch[1]}`;
+                        }
+                    }
+                    
+                    // 处理腾讯视频
+                    if (url.includes('v.qq.com')) {
+                        const vidMatch = url.match(/vid=(\w+)/);
+                        if (vidMatch) {
+                            return `https://v.qq.com/txp/iframe/player.html?vid=${vidMatch[1]}`;
+                        }
+                    }
+                    
+                    return url; // 如果无法处理，返回原始URL
+                },
+                growthProgress() {
+                    if (!this.productInfo || !this.productInfo.plantingDate || !this.productInfo.harvestDate) {
+                        return 0;
+                    }
+                    
+                    const plantDate = new Date(this.productInfo.plantingDate);
+                    const harvestDate = new Date(this.productInfo.harvestDate);
+                    const currentDate = new Date();
+                    
+                    // 如果当前日期已经超过收获日期，直接返回100%
+                    if (currentDate >= harvestDate) {
+                        return 100;
+                    }
+                    
+                    // 计算总天数和已经过去的天数
+                    const totalDays = (harvestDate - plantDate) / (1000 * 60 * 60 * 24);
+                    const passedDays = (currentDate - plantDate) / (1000 * 60 * 60 * 24);
+                    
+                    // 计算百分比，限制在0-100之间
+                    let progress = (passedDays / totalDays) * 100;
+                    return Math.min(Math.max(progress, 0), 100);
+                },
+                daysAfterHarvest() {
+                    if (!this.productInfo || !this.productInfo.harvestDate) {
+                        return 0;
+                    }
+                    
+                    const harvestDate = new Date(this.productInfo.harvestDate);
+                    const currentDate = new Date();
+                    
+                    // 如果当前日期在收获日期之前
+                    if (currentDate < harvestDate) {
+                        return 0;
+                    }
+                    
+                    // 计算收获后的天数
+                    const daysDiff = Math.floor((currentDate - harvestDate) / (1000 * 60 * 60 * 24));
+                    return daysDiff;
+                },
+                getCurrentDatePosition() {
+                    if (!this.productInfo || !this.productInfo.plantingDate || !this.productInfo.harvestDate) {
+                        return 50; // 默认在中间
+                    }
+                    
+                    const plantDate = new Date(this.productInfo.plantingDate);
+                    const harvestDate = new Date(this.productInfo.harvestDate);
+                    const currentDate = new Date();
+                    
+                    // 如果当前日期在种植日期之前
+                    if (currentDate < plantDate) {
+                        return 0;
+                    }
+                    
+                    // 如果当前日期在收获日期之后
+                    if (currentDate > harvestDate) {
+                        return 100;
+                    }
+                    
+                    // 计算当前日期在时间线上的百分比位置
+                    const totalDays = (harvestDate - plantDate) / (1000 * 60 * 60 * 24);
+                    const passedDays = (currentDate - plantDate) / (1000 * 60 * 60 * 24);
+                    return (passedDays / totalDays) * 100;
+                }
+            },
+            methods: {
+                formatDate(dateString) {
+                    if (!dateString) return '未设置';
+                    
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) return dateString;
+                    
+                    return date.toLocaleDateString('zh-CN', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                },
+                loadProductInfo() {
+                    try {
+                        // 从URL获取产品数据
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const productData = urlParams.get('data');
+                        
+                        if (productData) {
+                            // 尝试解析JSON数据
+                            this.productInfo = JSON.parse(decodeURIComponent(productData));
+                            console.log('加载产品数据成功:', this.productInfo);
+                        } else {
+                            // 没有数据参数
+                            this.productInfo = null;
+                            console.log('URL中没有产品数据');
+                        }
+                    } catch (e) {
+                        console.error('解析产品数据失败:', e);
+                        this.productInfo = null;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                initNutritionChart() {
+                    if (!this.productInfo) return;
+                    
+                    // 检查是否有营养成分数据
+                    let nutritionData = {};
+                    // 固定的营养成分标签顺序
+                    const nutritionLabels = ['蛋白质', '脂肪', '碳水化合物', '膳食纤维', '维生素C', '钙', '铁'];
+                    
+                    if (this.productInfo.nutritionValues && this.productInfo.nutritionValues.length > 0) {
+                        // 使用固定顺序的标签和传入的数值数组创建营养成分数据对象
+                        this.productInfo.nutritionValues.forEach((value, index) => {
+                            if (index < nutritionLabels.length) {
+                                nutritionData[nutritionLabels[index]] = value;
+                            }
+                        });
+                    } else {
+                        console.log('没有可用的营养成分数据');
+                        return;
+                    }
+                    
+                    try {
+                        const ctx = document.getElementById('nutritionChart').getContext('2d');
+                        
+                        if (this.nutritionChart) {
+                            this.nutritionChart.destroy();
+                        }
+                        
+                        this.nutritionChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: Object.keys(nutritionData),
+                                datasets: [ {
+                                    label: '营养成分含量',
+                                    data: Object.values(nutritionData),
+                                    backgroundColor: '#4CAF50',
+                                    borderColor: '#2E7D32',
+                                    borderWidth: 1
+                                } ]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: '含量(g/100g)  (微量元素单位为mg)'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    } catch (error) {
+                        console.error('营养成分图表初始化失败:', error);
+                    }
+                },
+                copyProductInfoAndRedirect() {
+                    if (!this.productInfo) {
+                        alert('产品信息不可用');
+                        return;
+                    }
+                    
+                    // 生成完整的 AI 提示词
+                    const aiPrompt = this.generateAIPrompt();
+                    
+                    // 复制提示词到剪贴板
+                    navigator.clipboard.writeText(aiPrompt).then(() => {
+                        alert('已将产品信息复制到剪贴板');
+                        // 跳转到指定网址
+                        window.location.href = 'https://www.wenxiaobai.com/';
+                    }).catch(err => {
+                        console.error('复制失败:', err);
+                        alert('复制失败，请手动复制产品信息');
+                    });
+                },
+                generateAIPrompt() {
+                    const { productName, location, plantingDate, harvestDate, nutritionValues } = this.productInfo;
+                    
+                    let prompt = `产品名称: ${productName}\n` +
+                        `种植地点: ${location}\n` +
+                        `种植时间: ${this.formatDate(plantingDate)}\n` +
+                        `收获时间: ${this.formatDate(harvestDate)}\n` +
+                        `营养成分: \n`;
+
+                    const unitMap = {
+                        '蛋白质': 'g',
+                        '脂肪': 'g',
+                        '碳水化合物': 'g',
+                        '膳食纤维': 'g',
+                        '维生素C': 'mg',
+                        '钙': 'mg',
+                        '铁': 'mg'
+                    };
+                    
+                    ['蛋白质', '脂肪', '碳水化合物', '膳食纤维', '维生素C', '钙', '铁']
+                    .forEach((label, index) => {
+                        if (nutritionValues[index] !== undefined) {
+                            prompt += `  ${label}: ${nutritionValues[index]} ${unitMap[label]}/100g\n`;
+                        }
+                    });
+                    
+                    return prompt;
+                },
+                playVideo() {
+                    if (this.productInfo.videoUrl) {
+                        const iframe = this.$refs.videoIframe;
+                        // 触发播放
+                        // 对于B站视频，直接调用iframe的play方法可能不生效，需要发送消息
+                        if (iframe && iframe.contentWindow) {
+                            iframe.contentWindow.postMessage(JSON.stringify({
+                                "action": "play"
+                            }), '*');
+                        }
+                    }
+                },
+                openFullscreen() {
+                    const iframe = this.$refs.videoIframe;
+                    if (iframe) {
+                        if (iframe.requestFullscreen) {
+                            iframe.requestFullscreen();
+                        } else if (iframe.webkitRequestFullscreen) {
+                            iframe.webkitRequestFullscreen();
+                        } else if (iframe.msRequestFullscreen) {
+                            iframe.msRequestFullscreen();
+                        }
+                    }
+                },
+                
+                // 地图相关方法
+                initDetailMap() {
+                    if (!this.productInfo || !this.productInfo.exactLocation) return;
+                    
+                    // 初始化地图
+                    this.$nextTick(() => {
+                        if (!document.getElementById('detail-map')) return;
+                        
+                        window._AMapSecurityConfig = {
+                            securityJsCode: 'd923255fe176efb202c35546cbc00a53' // 安全密钥
+                        };
+                        
+                        AMapLoader.load({
+                            key: "5ad852daa54b2ec5cc25ea383499b9b3", // 替换为您的 key
+                            version: "2.0", // 指定要加载的 JS API 的版本
+                            plugins: ["AMap.Geocoder", "AMap.Marker"] // 需要使用的插件列表
+                        })
+                        .then(AMap => {
+                            this.detailMap = new AMap.Map('detail-map', {
+                                resizeEnable: true,
+                                center: [this.productInfo.exactLocation.longitude, this.productInfo.exactLocation.latitude],
+                                zoom: 14
+                            });
+                            
+                            // 添加标记
+                            this.detailMarker = new AMap.Marker({
+                                position: [this.productInfo.exactLocation.longitude, this.productInfo.exactLocation.latitude],
+                                map: this.detailMap,
+                                icon: "https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png"
+                            });
+                            
+                            // 添加信息窗口
+                            const infoWindow = new AMap.InfoWindow({
+                                content: `<div class="p-2">${this.productInfo.exactLocation.address}</div>`,
+                                offset: new AMap.Pixel(0, -30)
+                            });
+                            
+                            // 点击标记时打开信息窗口
+                            this.detailMarker.on('click', () => {
+                                infoWindow.open(this.detailMap, this.detailMarker.getPosition());
+                            });
+                        })
+                        .catch(e => {
+                            console.error('地图加载失败:', e);
+                        });
+                    });
+                },
+                
+                openFullMap() {
+                    if (!this.productInfo || !this.productInfo.exactLocation) return;
+                    
+                    // 打开高德地图
+                    const url = `https://uri.amap.com/marker?position=${this.productInfo.exactLocation.longitude},${this.productInfo.exactLocation.latitude}&name=${encodeURIComponent(this.productInfo.productName)}&src=myapp&coordinate=gaode&callnative=0`;
+                    window.open(url, '_blank');
+                }
+            },
+            mounted() {
+                // 页面加载完成后立即加载产品信息
+                this.loadProductInfo();
+                
+                // 初始化营养成分图表和地图
+                this.$nextTick(() => {
+                    if (this.productInfo) {
+                        console.log('初始化组件，产品信息:', this.productInfo);
+                        this.initNutritionChart();
+                        
+                        // 如果有精确位置信息，初始化地图
+                        if (this.productInfo.exactLocation) {
+                            console.log('检测到精确位置信息，初始化地图');
+                            setTimeout(() => {
+                                this.initDetailMap();
+                            }, 500); // 延迟加载地图，确保DOM已渲染
+                        } else {
+                            console.log('没有精确位置信息，跳过地图初始化');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

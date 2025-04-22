@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员仪表盘 - 智慧农场小程序</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="components/unified-header.html"></script>
+    <script src="components/unified-footer.html"></script>
+    <style>
+        /* 页面特定样式 */
+        .admin-header {
+            background: linear-gradient(135deg, #2c9e4b 0%, #8bc34a 100%);
+        }
+        .status-good {
+            color: #07c160;
+        }
+        .status-warning {
+            color: #ff9800;
+        }
+        .status-danger {
+            color: #ff3b30;
+        }
+        .chart-container {
+            height: 200px;
+            position: relative;
+        }
+    </style>
+</head>
+<body class="safe-area" style="max-width: 414px; margin: 0 auto; position: relative; min-height: 100vh;">
+    <!-- 引入统一顶部导航栏 -->
+    <div id="header-container"></div>
+
+    <!-- 主要内容区域 -->
+    <main class="pb-16">
+        <!-- 管理员信息 -->
+        <div class="admin-header text-white p-4">
+            <div class="flex items-center">
+                <div class="w-16 h-16 rounded-full bg-white p-1 mr-4">
+                    <img src="https://randomuser.me/api/portraits/men/41.jpg" alt="管理员头像" class="w-full h-full rounded-full object-cover">
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold">张管理</h2>
+                    <p class="text-sm opacity-90">系统管理员</p>
+                    <div class="mt-1 text-xs bg-white bg-opacity-30 inline-block px-2 py-0.5 rounded-full">超级管理员</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快速统计 -->
+        <div class="p-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-medium text-gray-500">农田总数</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="text-2xl font-bold">24</div>
+                    <div class="text-xs text-green-600 mt-1">较上月 +2</div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-medium text-gray-500">注册用户</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <div class="text-2xl font-bold">156</div>
+                    <div class="text-xs text-green-600 mt-1">较上月 +12</div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-medium text-gray-500">设备总数</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                        </svg>
+                    </div>
+                    <div class="text-2xl font-bold">89</div>
+                    <div class="text-xs text-green-600 mt-1">较上月 +5</div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-medium text-gray-500">今日任务</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </div>
+                    <div class="text-2xl font-bold">18</div>
+                    <div class="text-xs text-red-600 mt-1">较昨日 +3</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统状态 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">系统状态</h2>
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="divide-y">
+                    <div class="py-3 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                                </svg>
+                            </div>
+                            <span>服务器状态</span>
+                        </div>
+                        <span class="text-sm status-good">正常</span>
+                    </div>
+                    <div class="py-3 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                                </svg>
+                            </div>
+                            <span>数据库连接</span>
+                        </div>
+                        <span class="text-sm status-good">正常</span>
+                    </div>
+                    <div class="py-3 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <span>系统负载</span>
+                        </div>
+                        <span class="text-sm status-warning">中等</span>
+                    </div>
+                    <div class="py-3 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <span>系统警报</span>
+                        </div>
+                        <span class="text-sm status-danger">3个未处理</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 最近活动 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">最近活动</h2>
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="divide-y">
+                    <div class="py-3">
+                        <div class="flex items-center justify-between mb-1">
+                            <div class="font-medium">新用户注册</div>
+                            <span class="text-xs text-gray-500">10分钟前</span>
+                        </div>
+                        <p class="text-sm text-gray-600">李农户 (ID: 10086) 完成了注册</p>
+                    </div>
+                    <div class="py-3">
+                        <div class="flex items-center justify-between mb-1">
+                            <div class="font-medium">设备状态变更</div>
+                            <span class="text-xs text-gray-500">30分钟前</span>
+                        </div>
+                        <p class="text-sm text-gray-600">东区蔬菜大棚温控系统报告故障</p>
+                    </div>
+                    <div class="py-3">
+                        <div class="flex items-center justify-between mb-1">
+                            <div class="font-medium">系统更新</div>
+                            <span class="text-xs text-gray-500">2小时前</span>
+                        </div>
+                        <p class="text-sm text-gray-600">系统完成了自动更新 (v1.0.5)</p>
+                    </div>
+                    <div class="py-3">
+                        <div class="flex items-center justify-between mb-1">
+                            <div class="font-medium">任务完成</div>
+                            <span class="text-xs text-gray-500">3小时前</span>
+                        </div>
+                        <p class="text-sm text-gray-600">张农夫完成了西区水稻田浇水任务</p>
+                    </div>
+                </div>
+                <button class="w-full mt-3 py-2 text-sm text-green-600 font-medium">查看全部活动</button>
+            </div>
+        </div>
+
+        <!-- 管理功能 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">管理功能</h2>
+            <div class="grid grid-cols-3 gap-3">
+                <a href="#" class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </div>
+                    <div class="text-sm">用户管理</div>
+                </a>
+                <a href="#" class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="text-sm">农田管理</div>
+                </a>
+                <a href="#" class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                        </svg>
+                    </div>
+                    <div class="text-sm">设备管理</div>
+                </a>
+                <a href="#" class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </div>
+                    <div class="text-sm">任务管理</div>
+                </a>
+                <a href="#" class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="text-sm">系统日志</div>
+                </a>
+                <a href="#" class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                    <div class="text-sm">系统设置</div>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- 引入统一底部导航栏 -->
+    <div id="footer-container"></div>
+
+    <!-- JavaScript -->
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载统一头部
+            fetch('components/unified-header.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('header-container').innerHTML = data;
+                });
+            
+            // 加载统一底部
+            fetch('components/unified-footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('footer-container').innerHTML = data;
+                });
+            
+            console.log('管理员仪表盘页面加载完成');
+        });
+
+        // 退出登录功能
+        function logout() {
+            if(confirm('确定要退出登录吗？')) {
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>

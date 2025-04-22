@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>农田监控 - 智慧农场小程序</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <style>
+        /* 页面特定样式 */
+        .device-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+        .status-on {
+            background-color: #07c160;
+        }
+        .status-off {
+            background-color: #999;
+        }
+        .status-error {
+            background-color: #ff3b30;
+        }
+        .chart-container {
+            height: 200px;
+            position: relative;
+        }
+        .chart-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .chart-line-path {
+            stroke: #07c160;
+            stroke-width: 2;
+            fill: none;
+        }
+        .chart-line-area {
+            fill: url(#gradient);
+            opacity: 0.2;
+        }
+        .chart-grid-line {
+            stroke: #e5e5e5;
+            stroke-width: 1;
+        }
+        .chart-point {
+            fill: #07c160;
+            stroke: white;
+            stroke-width: 2;
+        }
+        .data-card {
+            transition: all 0.3s ease;
+        }
+        .data-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .tab-active {
+            color: #07c160;
+            border-bottom: 2px solid #07c160;
+        }
+        .progress-bar {
+            height: 6px;
+            border-radius: 3px;
+            background-color: #e5e5e5;
+            overflow: hidden;
+        }
+        .progress-value {
+            height: 100%;
+            border-radius: 3px;
+        }
+        .progress-value-good {
+            background-color: #07c160;
+        }
+        .progress-value-warning {
+            background-color: #ff9800;
+        }
+        .progress-value-danger {
+            background-color: #ff3b30;
+        }
+        .animated-icon {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 120px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            background-color: #07c160;
+            color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            transform: translateX(200%);
+            transition: transform 0.5s ease;
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        .weather-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 8px;
+        }
+        .device-control-panel {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 40;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        .device-control-panel.show {
+            transform: translateY(0);
+            display: block;
+        }
+        .device-control-handle {
+            width: 40px;
+            height: 5px;
+            background-color: #e5e5e5;
+            border-radius: 3px;
+            margin: 10px auto;
+        }
+        .slider-container {
+            padding: 0 16px;
+        }
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e5e5e5;
+            outline: none;
+            margin: 10px 0;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #07c160;
+            cursor: pointer;
+        }
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #07c160;
+            cursor: pointer;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: #07c160;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(7, 193, 96, 0.3);
+            border-radius: 50%;
+            border-top-color: #07c160;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* 新增样式 */
+        .video-monitor-btn {
+            position: fixed;
+            bottom: 80px;  /* 从20px调整为80px */
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: #07c160;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        .video-monitor-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+    </style>
+</head>
+<body class="safe-area" style="max-width: 414px; margin: 0 auto; position: relative; min-height: 100vh;">
+    <!-- 引入统一顶部导航栏 -->
+    <div id="header-container"></div>
+
+    <!-- 通知提示 -->
+    <div class="notification" id="notification">
+        <div class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span id="notification-text">数据已更新</span>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <main class="pb-16">
+        <!-- 农田选择器 -->
+        <div class="p-4 bg-white">
+            <div class="relative">
+                <select class="w-full p-2 pr-8 border border-gray-300 rounded-lg appearance-none bg-white" id="farm-selector">
+                    <option value="west-rice">西区水稻田</option>
+                    <option value="east-vegetable">东区蔬菜大棚</option>
+                    <option value="south-orchard">南区果园</option>
+                    <option value="north-test">北区试验田</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 天气信息 -->
+        <div class="p-4">
+            <div class="bg-white rounded-lg shadow p-4 mb-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <div class="weather-icon bg-blue-100 rounded-full flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-medium">今日天气</h3>
+                            <p class="text-sm text-gray-500">晴朗 26°C</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">湿度: 65%</div>
+                        <div class="text-sm text-gray-500">风速: 3km/h</div>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs text-gray-500">天气预报: 未来24小时内无降雨，适合农事活动</div>
+            </div>
+        </div>
+
+        <!-- 实时数据卡片 -->
+        <div class="p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-bold">实时数据</h2>
+                <span class="text-xs text-gray-500" id="update-time">更新于: 2023-06-15 14:30</span>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="data-card bg-white rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <span>温度</span>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full status">正常</span>
+                    </div>
+                    <div class="text-2xl font-bold" id="temperature-value">26.5°C</div>
+                    <div class="text-xs text-gray-500 mt-1">正常范围: 20-30°C</div>
+                    <div class="mt-2 text-xs text-green-600 flex items-center" id="temperature-change">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                        较昨日 +1.2°C
+                    </div>
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>过去24小时</span>
+                        </div>
+                        <div class="h-10">
+                            <svg width="100%" height="100%" viewBox="0 0 100 30" preserveAspectRatio="none" id="temperature-chart">
+                                <path d="M0,15 C10,10 20,20 30,15 C40,10 50,5 60,10 C70,15 80,20 90,15 L90,30 L0,30 Z" fill="rgba(7, 193, 96, 0.1)" />
+                                <path d="M0,15 C10,10 20,20 30,15 C40,10 50,5 60,10 C70,15 80,20 90,15" stroke="#07c160" stroke-width="1.5" fill="none" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card bg-white rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>湿度</span>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full status">正常</span>
+                    </div>
+                    <div class="text-2xl font-bold" id="humidity-value">68%</div>
+                    <div class="text-xs text-gray-500 mt-1">正常范围: 60-80%</div>
+                    <div class="mt-2 text-xs text-red-600 flex items-center" id="humidity-change">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                        较昨日 -5%
+                    </div>
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>过去24小时</span>
+                        </div>
+                        <div class="h-10">
+                            <svg width="100%" height="100%" viewBox="0 0 100 30" preserveAspectRatio="none" id="humidity-chart">
+                                <path d="M0,10 C10,15 20,5 30,10 C40,15 50,20 60,15 C70,10 80,5 90,10 L90,30 L0,30 Z" fill="rgba(59, 130, 246, 0.1)" />
+                                <path d="M0,10 C10,15 20,5 30,10 C40,15 50,20 60,15 C70,10 80,5 90,10" stroke="#3b82f6" stroke-width="1.5" fill="none" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card bg-white rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            <span>光照</span>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full status">正常</span>
+                    </div>
+                    <div class="text-2xl font-bold" id="light-value">68,000 lux</div>
+                    <div class="text-xs text-gray-500 mt-1">正常范围: 50k-80k lux</div>
+                    <div class="mt-2 text-xs text-green-600 flex items-center" id="light-change">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                        较昨日 +12%
+                    </div>
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>过去24小时</span>
+                        </div>
+                        <div class="h-10">
+                            <svg width="100%" height="100%" viewBox="0 0 100 30" preserveAspectRatio="none" id="light-chart">
+                                <path d="M0,20 C10,15 20,10 30,5 C40,10 50,15 60,10 C70,5 80,10 90,5 L90,30 L0,30 Z" fill="rgba(245, 158, 11, 0.1)" />
+                                <path d="M0,20 C10,15 20,10 30,5 C40,10 50,15 60,10 C70,5 80,10 90,5" stroke="#f59e0b" stroke-width="1.5" fill="none" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card bg-white rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>土壤湿度</span>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full status">正常</span>
+                    </div>
+                    <div class="text-2xl font-bold" id="soil-value">42%</div>
+                    <div class="text-xs text-gray-500 mt-1">正常范围: 35-50%</div>
+                    <div class="mt-2 text-xs text-red-600 flex items-center" id="soil-change">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                        较昨日 -3%
+                    </div>
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>过去24小时</span>
+                        </div>
+                        <div class="h-10">
+                            <svg width="100%" height="100%" viewBox="0 0 100 30" preserveAspectRatio="none" id="soil-chart">
+                                <path d="M0,15 C10,20 20,15 30,10 C40,5 50,10 60,15 C70,20 80,15 90,10 L90,30 L0,30 Z" fill="rgba(7, 193, 96, 0.1)" />
+                                <path d="M0,15 C10,20 20,15 30,10 C40,5 50,10 60,15 C70,20 80,15 90,10" stroke="#07c160" stroke-width="1.5" fill="none" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 设备控制面板 -->
+        <div class="device-control-panel hidden">
+            <div class="device-control-handle"></div>
+            <div class="p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium panel-title">设备控制</h3>
+                    <button class="p-2" data-panel-close>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="control-options">
+                    <!-- 控制选项将通过JavaScript动态添加 -->
+                </div>
+                <div class="mt-6 flex space-x-3">
+                    <button class="flex-1 py-2 bg-gray-200 rounded-lg" data-panel-close>取消</button>
+                    <button class="flex-1 py-2 bg-green-500 text-white rounded-lg" data-panel-save>保存</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 视频监控按钮 -->
+    <div class="video-monitor-btn" onclick="window.location.href='farm-video-monitor.html'">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path fill="white" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-8h10v2H7z" />
+        </svg>
+    </div>
+
+    <!-- 引入统一底部导航栏 -->
+    <div id="footer-container"></div>
+    
+    <!-- JavaScript -->
+    <script src="js/unified-app.js"></script>
+    <script>
+        // 区域数据
+        const farmData = {
+            'west-rice': {
+                temperature: 26.5,
+                humidity: 68,
+                light: 68000,
+                soil: 42,
+                status: {
+                    temperature: '正常',
+                    humidity: '正常',
+                    light: '正常',
+                    soil: '正常'
+                },
+                change: {
+                    temperature: '+1.2°C',
+                    humidity: '-5%',
+                    light: '+12%',
+                    soil: '-3%'
+                },
+                chart: {
+                    temperature: 'M0,15 C10,10 20,20 30,15 C40,10 50,5 60,10 C70,15 80,20 90,15',
+                    humidity: 'M0,10 C10,15 20,5 30,10 C40,15 50,20 60,15 C70,10 80,5 90,10',
+                    light: 'M0,20 C10,15 20,10 30,5 C40,10 50,15 60,10 C70,5 80,10 90,5',
+                    soil: 'M0,15 C10,20 20,15 30,10 C40,5 50,10 60,15 C70,20 80,15 90,10'
+                }
+            },
+            'east-vegetable': {
+                temperature: 24.8,
+                humidity: 72,
+                light: 55000,
+                soil: 48,
+                status: {
+                    temperature: '正常',
+                    humidity: '正常',
+                    light: '偏低',
+                    soil: '正常'
+                },
+                change: {
+                    temperature: '-0.3°C',
+                    humidity: '+2%',
+                    light: '-5%',
+                    soil: '+1%'
+                },
+                chart: {
+                    temperature: 'M0,18 C10,15 20,12 30,10 C40,8 50,6 60,5 C70,4 80,3 90,2',
+                    humidity: 'M0,5 C10,8 20,3 30,6 C40,9 50,4 60,7 C70,10 80,6 90,9',
+                    light: 'M0,25 C10,20 20,15 30,10 C40,5 50,10 60,15 C70,10 80,15 90,10',
+                    soil: 'M0,8 C10,6 20,4 30,2 C40,0 50,2 60,4 C70,6 80,4 90,2'
+                }
+            },
+            'south-orchard': {
+                temperature: 28.2,
+                humidity: 58,
+                light: 72000,
+                soil: 38,
+                status: {
+                    temperature: '偏高',
+                    humidity: '偏低',
+                    light: '正常',
+                    soil: '偏低'
+                },
+                change: {
+                    temperature: '+2.5°C',
+                    humidity: '-8%',
+                    light: '+5%',
+                    soil: '-5%'
+                },
+                chart: {
+                    temperature: 'M0,5 C10,8 20,3 30,6 C40,9 50,4 60,7 C70,10 80,6 90,9',
+                    humidity: 'M0,25 C10,20 20,15 30,10 C40,5 50,10 60,15 C70,10 80,15 90,10',
+                    light: 'M0,10 C10,5 20,15 30,8 C40,12 50,5 60,8 C70,12 80,8 90,10',
+                    soil: 'M0,20 C10,15 20,10 30,5 C40,10 50,15 60,10 C70,5 80,10 90,5'
+                }
+            },
+            'north-test': {
+                temperature: 22.5,
+                humidity: 75,
+                light: 50000,
+                soil: 45,
+                status: {
+                    temperature: '偏低',
+                    humidity: '正常',
+                    light: '偏低',
+                    soil: '正常'
+                },
+                change: {
+                    temperature: '-1.0°C',
+                    humidity: '+3%',
+                    light: '-8%',
+                    soil: '+2%'
+                },
+                chart: {
+                    temperature: 'M0,20 C10,15 20,10 30,5 C40,10 50,15 60,10 C70,5 80,10 90,5',
+                    humidity: 'M0,8 C10,6 20,4 30,2 C40,0 50,2 60,4 C70,6 80,4 90,2',
+                    light: 'M0,25 C10,20 20,15 30,10 C40,5 50,10 60,15 C70,10 80,15 90,10',
+                    soil: 'M0,12 C10,10 20,8 30,6 C40,4 50,6 60,8 C70,6 80,4 90,2'
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载统一头部
+            fetch('components/unified-header.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('header-container').innerHTML = data;
+                });
+            
+            // 加载统一底部
+            fetch('components/unified-footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('footer-container').innerHTML = data;
+                });
+
+            // 初始化数据
+            updateData('west-rice');
+
+            // 区域选择器事件
+            document.getElementById('farm-selector').addEventListener('change', function() {
+                const selectedFarm = this.value;
+                updateData(selectedFarm);
+            });
+
+            // 模拟数据更新
+            setInterval(function() {
+                const selectedFarm = document.getElementById('farm-selector').value;
+                updateData(selectedFarm);
+            }, 10000);
+        });
+
+        function updateData(farm) {
+            const data = farmData[farm];
+            
+            // 更新时间
+            const now = new Date();
+            const formattedDate = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            document.getElementById('update-time').textContent = `更新于: ${formattedDate}`;
+            
+            // 更新数据
+            document.getElementById('temperature-value').textContent = `${data.temperature.toFixed(1)}°C`;
+            document.getElementById('humidity-value').textContent = `${data.humidity}%`;
+            document.getElementById('light-value').textContent = `${data.light.toLocaleString()} lux`;
+            document.getElementById('soil-value').textContent = `${data.soil}%`;
+            
+            // 更新状态
+            document.querySelectorAll('.status').forEach((element, index) => {
+                element.textContent = Object.values(data.status)[index];
+            });
+            
+            // 更新变化
+            document.querySelectorAll('[id$="-change"]').forEach((element, index) => {
+                element.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${index % 2 === 0 ? 'M5 10l7-7m0 0l7 7m-7-7v18' : 'M19 14l-7 7m0 0l-7-7m7 7V3'}" />
+                    </svg>
+                    较昨日 ${Object.values(data.change)[index]}
+                `;
+            });
+            
+            // 更新图表
+            document.getElementById('temperature-chart').innerHTML = `
+                <path d="M0,15 ${data.chart.temperature} L90,15" fill="rgba(7, 193, 96, 0.1)" />
+                <path d="M0,15 ${data.chart.temperature}" stroke="#07c160" stroke-width="1.5" fill="none" />
+            `;
+            
+            document.getElementById('humidity-chart').innerHTML = `
+                <path d="M0,10 ${data.chart.humidity} L90,10" fill="rgba(59, 130, 246, 0.1)" />
+                <path d="M0,10 ${data.chart.humidity}" stroke="#3b82f6" stroke-width="1.5" fill="none" />
+            `;
+            
+            document.getElementById('light-chart').innerHTML = `
+                <path d="M0,20 ${data.chart.light} L90,20" fill="rgba(245, 158, 11, 0.1)" />
+                <path d="M0,20 ${data.chart.light}" stroke="#f59e0b" stroke-width="1.5" fill="none" />
+            `;
+            
+            document.getElementById('soil-chart').innerHTML = `
+                <path d="M0,15 ${data.chart.soil} L90,15" fill="rgba(7, 193, 96, 0.1)" />
+                <path d="M0,15 ${data.chart.soil}" stroke="#07c160" stroke-width="1.5" fill="none" />
+            `;
+            
+            // 显示更新提示
+            const notification = document.getElementById('notification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

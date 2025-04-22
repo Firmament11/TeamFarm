@@ -1,0 +1,340 @@
+/* 智慧农场小程序动画和交互效果样式 */
+
+/* 基础动画效果 */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.slide-up {
+    animation: slideUp 0.5s ease-in-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.slide-down {
+    animation: slideDown 0.5s ease-in-out;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.slide-left {
+    animation: slideLeft 0.5s ease-in-out;
+}
+
+@keyframes slideLeft {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.slide-right {
+    animation: slideRight 0.5s ease-in-out;
+}
+
+@keyframes slideRight {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* 脉冲动画 */
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* 呼吸灯效果 */
+.breathing {
+    animation: breathing 3s ease-in-out infinite;
+}
+
+@keyframes breathing {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
+/* 闪烁效果 */
+.blink {
+    animation: blink 1s linear infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+/* 旋转动画 */
+.rotate {
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* 加载动画 */
+.loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(7, 193, 96, 0.3);
+    border-radius: 50%;
+    border-top-color: #07c160;
+    animation: spin 1s ease-in-out infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 波纹效果 */
+.ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple:after {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    transform: scale(10, 10);
+    opacity: 0;
+    transition: transform .5s, opacity 1s;
+}
+
+.ripple:active:after {
+    transform: scale(0, 0);
+    opacity: 0.3;
+    transition: 0s;
+}
+
+/* 卡片悬浮效果 */
+.hover-float {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-float:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* 按钮点击效果 */
+.btn-press {
+    transition: transform 0.1s ease;
+}
+
+.btn-press:active {
+    transform: scale(0.97);
+}
+
+/* 滑入滑出效果 */
+.slide-in-panel {
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.slide-in-panel.show {
+    transform: translateY(0);
+}
+
+/* 淡入淡出效果 */
+.fade-panel {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.fade-panel.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 数据更新闪烁效果 */
+.data-update-flash {
+    animation: dataFlash 1s ease;
+}
+
+@keyframes dataFlash {
+    0% { background-color: rgba(7, 193, 96, 0); }
+    50% { background-color: rgba(7, 193, 96, 0.2); }
+    100% { background-color: rgba(7, 193, 96, 0); }
+}
+
+/* 通知提示动画 */
+.notification-popup {
+    transform: translateX(120%);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.notification-popup.show {
+    transform: translateX(0);
+}
+
+/* 页面切换过渡效果 */
+.page-transition {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.page-transition.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 图表加载动画 */
+.chart-loading {
+    position: relative;
+}
+
+.chart-loading:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.chart-loading:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(7, 193, 96, 0.3);
+    border-radius: 50%;
+    border-top-color: #07c160;
+    animation: spin 1s ease-in-out infinite;
+    z-index: 11;
+}
+
+/* 开关切换动画 */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #07c160;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+}
+
+/* 进度条动画 */
+.progress-animate {
+    transition: width 1s ease-in-out;
+}
+
+/* 徽章闪烁效果 */
+.badge-blink {
+    animation: badgeBlink 2s infinite;
+}
+
+@keyframes badgeBlink {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* 列表项滑入效果 */
+.list-item-slide {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+.list-item-slide.show {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* 列表项交错动画 */
+.staggered-item {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.staggered-item.show {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* 自定义动画延迟类 */
+.delay-100 { animation-delay: 0.1s; transition-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; transition-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; transition-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; transition-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; transition-delay: 0.5s; }
+.delay-600 { animation-delay: 0.6s; transition-delay: 0.6s; }
+.delay-700 { animation-delay: 0.7s; transition-delay: 0.7s; }
+.delay-800 { animation-delay: 0.8s; transition-delay: 0.8s; }
+.delay-900 { animation-delay: 0.9s; transition-delay: 0.9s; }
+.delay-1000 { animation-delay: 1s; transition-delay: 1s; }

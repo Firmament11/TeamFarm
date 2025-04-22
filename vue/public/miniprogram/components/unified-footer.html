@@ -1,0 +1,74 @@
+<!-- 统一底部导航栏组件 -->
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-10 safe-area-bottom">
+    <div class="flex justify-around items-center py-2">
+        <a href="home.html" class="nav-item flex flex-col items-center px-3 py-1" id="nav-home">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7m-14 0l2 2m0 0l7 7 7-7m-14 0l2-2" />
+            </svg>
+            <span class="text-xs mt-1">首页</span>
+        </a>
+        <a href="farm-monitor.html" class="nav-item flex flex-col items-center px-3 py-1" id="nav-monitor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-xs mt-1">监控</span>
+        </a>
+        <a href="task.html" class="nav-item flex flex-col items-center px-3 py-1" id="nav-task">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <span class="text-xs mt-1">任务</span>
+        </a>
+        <a href="data-analysis.html" class="nav-item flex flex-col items-center px-3 py-1" id="nav-analysis">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span class="text-xs mt-1">分析</span>
+        </a>
+        <a href="profile.html" class="nav-item flex flex-col items-center px-3 py-1" id="nav-profile">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span class="text-xs mt-1">我的</span>
+        </a>
+    </div>
+</div>
+
+<script>
+    // 根据当前页面URL设置活动导航项
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentPath = window.location.pathname;
+        const filename = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+        
+        // 移除所有导航项的active类
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+            item.querySelector('.nav-icon').classList.remove('text-green-500');
+            item.querySelector('span').classList.remove('text-green-500');
+        });
+        
+        // 根据当前页面设置活动导航项
+        let activeNavId = null;
+        
+        if (filename === 'home.html' || filename === '') {
+            activeNavId = 'nav-home';
+        } else if (filename.includes('farm-monitor') || filename.includes('farm-video-monitor')) {
+            activeNavId = 'nav-monitor';
+        } else if (filename.includes('task')) {
+            activeNavId = 'nav-task';
+        } else if (filename.includes('data-analysis')) {
+            activeNavId = 'nav-analysis';
+        } else if (filename.includes('profile')) {
+            activeNavId = 'nav-profile';
+        }
+        
+        if (activeNavId) {
+            const activeNav = document.getElementById(activeNavId);
+            if (activeNav) {
+                activeNav.classList.add('active');
+                activeNav.querySelector('.nav-icon').classList.add('text-green-500');
+                activeNav.querySelector('span').classList.add('text-green-500');
+            }
+        }
+    });
+</script>

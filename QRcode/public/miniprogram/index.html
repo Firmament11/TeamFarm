@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>智慧农场小程序</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.31/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="components/unified-header.html"></script>
+    <script src="components/unified-footer.html"></script>
+    <style>
+        /* 页面特定样式 */
+        .weather-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        .task-card {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #06ad56;
+        }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .status-good {
+            color: #07c160;
+        }
+        .status-warning {
+            color: #ff9800;
+        }
+        .status-danger {
+            color: #ff3b30;
+        }
+    </style>
+</head>
+<body class="safe-area" style="max-width: 414px; margin: 0 auto; position: relative; min-height: 100vh;">
+    <!-- 引入统一顶部导航栏 -->
+    <div id="header-container"></div>
+
+    <!-- 主要内容区域 -->
+    <main class="pb-16">
+        <!-- 轮播图 -->
+        <div class="relative bg-gray-100 h-48 overflow-hidden">
+            <div class="absolute inset-0 flex">
+                <div class="w-full flex-shrink-0">
+                    <img src="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="农场图片" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+                    <div class="absolute bottom-0 left-0 p-4 text-white">
+                        <h2 class="text-xl font-bold">智慧农业新时代</h2>
+                        <p class="text-sm">科技赋能，提升农业生产效率</p>
+                    </div>
+                </div>
+            </div>
+            <!-- 轮播指示器 -->
+            <div class="absolute bottom-2 left-0 right-0 flex justify-center space-x-2">
+                <span class="h-1.5 w-6 rounded-full bg-white"></span>
+                <span class="h-1.5 w-1.5 rounded-full bg-white bg-opacity-50"></span>
+                <span class="h-1.5 w-1.5 rounded-full bg-white bg-opacity-50"></span>
+            </div>
+        </div>
+
+        <!-- 快捷功能区 -->
+        <div class="bg-white p-4">
+            <div class="grid grid-cols-4 gap-4 text-center">
+                <a href="farm-monitor.html" class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-1">
+                        <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <span class="text-xs">农田监控</span>
+                </a>
+                <a href="data-analysis.html" class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-1">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <span class="text-xs">数据分析</span>
+                </a>
+                <a href="inventory.html" class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mb-1">
+                        <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                    </div>
+                    <span class="text-xs">物资管理</span>
+                </a>
+                <a href="task.html" class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-1">
+                        <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </div>
+                    <span class="text-xs">任务管理</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 农田状态卡片 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">农田状态</h2>
+            <div class="bg-white rounded-lg shadow p-4 mb-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium">西区水稻田</h3>
+                    <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">良好</span>
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <div class="text-center">
+                        <div class="text-sm text-gray-500">温度</div>
+                        <div class="font-medium">26°C</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm text-gray-500">湿度</div>
+                        <div class="font-medium">68%</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm text-gray-500">光照</div>
+                        <div class="font-medium">强</div>
+                    </div>
+                </div>
+                <div class="flex justify-between">
+                    <button class="text-sm text-blue-500">查看详情</button>
+                    <button class="text-sm text-blue-500">调整设备</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium">东区蔬菜大棚</h3>
+                    <span class="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">需要关注</span>
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <div class="text-center">
+                        <div class="text-sm text-gray-500">温度</div>
+                        <div class="font-medium status-warning">32°C</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm text-gray-500">湿度</div>
+                        <div class="font-medium">55%</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm text-gray-500">光照</div>
+                        <div class="font-medium">中</div>
+                    </div>
+                </div>
+                <div class="flex justify-between">
+                    <button class="text-sm text-blue-500">查看详情</button>
+                    <button class="text-sm text-blue-500">调整设备</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 今日任务 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">今日任务</h2>
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="divide-y">
+                    <div class="py-3 flex items-center">
+                        <input type="checkbox" class="h-5 w-5 text-green-500 rounded mr-3">
+                        <div class="flex-1">
+                            <h4 class="font-medium">西区水稻田浇水</h4>
+                            <p class="text-sm text-gray-500">09:00 - 10:00</p>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full">紧急</span>
+                    </div>
+                    <div class="py-3 flex items-center">
+                        <input type="checkbox" class="h-5 w-5 text-green-500 rounded mr-3">
+                        <div class="flex-1">
+                            <h4 class="font-medium">东区蔬菜大棚施肥</h4>
+                            <p class="text-sm text-gray-500">14:00 - 15:00</p>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">普通</span>
+                    </div>
+                    <div class="py-3 flex items-center">
+                        <input type="checkbox" class="h-5 w-5 text-green-500 rounded mr-3" checked>
+                        <div class="flex-1">
+                            <h4 class="font-medium line-through text-gray-400">南区果园巡检</h4>
+                            <p class="text-sm text-gray-400">08:00 - 09:00</p>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full">已完成</span>
+                    </div>
+                </div>
+                <button class="w-full mt-3 py-2 bg-green-500 text-white rounded-lg font-medium">添加任务</button>
+            </div>
+        </div>
+
+        <!-- 天气预报 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">天气预报</h2>
+            <div class="weather-card rounded-lg shadow p-4 text-white">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-2xl font-bold">26°C</h3>
+                        <p>多云转晴</p>
+                        <p class="text-sm">郑州市中原区</p>
+                    </div>
+                    <svg class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                    </svg>
+                </div>
+                <div class="flex justify-between text-center">
+                    <div>
+                        <p class="text-sm">明天</p>
+                        <svg class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <p class="text-sm">28°C</p>
+                    </div>
+                    <div>
+                        <p class="text-sm">后天</p>
+                        <svg class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                        </svg>
+                        <p class="text-sm">25°C</p>
+                    </div>
+                    <div>
+                        <p class="text-sm">周三</p>
+                        <svg class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <p class="text-sm">27°C</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 农业资讯 -->
+        <div class="p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-bold">农业资讯</h2>
+                <a href="news.html" class="text-sm text-blue-500">更多</a>
+            </div>
+            <div class="bg-white rounded-lg shadow divide-y">
+                <div class="p-4">
+                    <h3 class="font-medium mb-1">最新农业补贴政策发布，种粮农民迎来好消息</h3>
+                    <p class="text-sm text-gray-500 mb-2">农业农村部近日发布2023年农业补贴新政策，种粮农民将获得更多支持。</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-400">2小时前</span>
+                        <span class="text-xs text-gray-400">阅读量: 1.2万</span>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-medium mb-1">智能灌溉系统助力节水农业发展</h3>
+                    <p class="text-sm text-gray-500 mb-2">新型智能灌溉系统可根据土壤墒情自动调节灌溉量，节水效果显著。</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-400">5小时前</span>
+                        <span class="text-xs text-gray-400">阅读量: 8562</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 引入统一底部导航栏 -->
+    <div id="footer-container"></div>
+    
+    <script src="js/unified-app.js"></script>
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载统一头部
+            fetch('components/unified-header.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('header-container').innerHTML = data;
+                });
+            
+            // 加载统一底部
+            fetch('components/unified-footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('footer-container').innerHTML = data;
+                });
+            
+            // 设置页面标题
+            document.getElementById('page-title').textContent = '智慧农场小程序';
+            
+            // 根据当前页面URL设置活动导航项
+            const currentPath = window.location.pathname;
+            const filename = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+            
+            // 移除所有导航项的active类
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.nav-icon').classList.remove('text-green-500');
+                item.querySelector('span').classList.remove('text-green-500');
+            });
+            
+            // 根据当前页面设置活动导航项
+            let activeNavId = null;
+            
+            if (filename === 'home.html' || filename === '') {
+                activeNavId = 'nav-home';
+            } else if (filename.includes('farm-monitor') || filename.includes('farm-video-monitor')) {
+                activeNavId = 'nav-monitor';
+            } else if (filename.includes('task')) {
+                activeNavId = 'nav-task';
+            } else if (filename.includes('data-analysis')) {
+                activeNavId = 'nav-analysis';
+            } else if (filename.includes('profile')) {
+                activeNavId = 'nav-profile';
+            }
+            
+            if (activeNavId) {
+                const activeNav = document.getElementById(activeNavId);
+                if (activeNav) {
+                    activeNav.classList.add('active');
+                    activeNav.querySelector('.nav-icon').classList.add('text-green-500');
+                    activeNav.querySelector('span').classList.add('text-green-500');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

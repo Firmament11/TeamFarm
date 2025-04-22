@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>创建任务 - 智慧农场小程序</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <script src="components/unified-header.html"></script>
+    <script src="components/unified-footer.html"></script>
+    <style>
+        /* 自定义样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f7f8fa;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+        }
+        .safe-area {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-item.active {
+            color: #07c160;
+        }
+        .nav-item.active .nav-icon {
+            color: #07c160;
+        }
+        .btn-primary {
+            background-color: #07c160;
+        }
+        .btn-primary:hover {
+            background-color: #06ad56;
+        }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="safe-area" style="max-width: 414px; margin: 0 auto; position: relative; min-height: 100vh;">
+    <!-- 引入统一顶部导航栏 -->
+    <div id="header-container"></div>
+
+    <!-- 主要内容区域 -->
+    <main class="pb-16">
+        <div class="p-4">
+            <div class="bg-white rounded-lg shadow p-4 mb-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">任务名称</label>
+                    <input type="text" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="请输入任务名称">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">任务类型</label>
+                    <div class="flex space-x-2 overflow-x-auto pb-2">
+                        <button class="px-3 py-1 text-sm bg-green-500 text-white rounded-full whitespace-nowrap">浇水</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full whitespace-nowrap">施肥</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full whitespace-nowrap">病虫害防治</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full whitespace-nowrap">收获</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full whitespace-nowrap">巡检</button>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">优先级</label>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 text-sm bg-red-100 text-red-800 rounded-full">紧急</button>
+                        <button class="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full">普通</button>
+                        <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full">低</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4 mb-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">执行地点</label>
+                    <select class="w-full p-2 border border-gray-300 rounded-lg">
+                        <option>请选择执行地点</option>
+                        <option>西区水稻田</option>
+                        <option>东区蔬菜大棚</option>
+                        <option>南区果园</option>
+                        <option>北区试验田</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">负责人</label>
+                    <div class="relative">
+                        <input type="text" class="w-full p-2 pl-10 border border-gray-300 rounded-lg" placeholder="请选择负责人">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">执行时间</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">开始时间</label>
+                            <input type="datetime-local" class="w-full p-2 border border-gray-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">结束时间</label>
+                            <input type="datetime-local" class="w-full p-2 border border-gray-300 rounded-lg">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4 mb-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">任务描述</label>
+                    <textarea class="w-full p-2 border border-gray-300 rounded-lg h-24" placeholder="请输入任务描述"></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">添加图片</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <div class="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4 mb-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">相关设备</label>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500">选择需要使用的设备</span>
+                        <button class="text-sm text-blue-500">添加设备</button>
+                    </div>
+                </div>
+
+                <div class="border border-gray-200 rounded-lg p-3 mb-2 flex items-center">
+                    <input type="checkbox" class="h-4 w-4 text-green-500 rounded mr-3">
+                    <div class="flex-1">
+                        <h4 class="font-medium">智能灌溉控制器</h4>
+                        <p class="text-xs text-gray-500">设备ID: IR-2023-001</p>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="h-2 w-2 rounded-full bg-green-500 mr-1"></span>
+                        <span class="text-xs text-green-600">正常</span>
+                    </div>
+                </div>
+
+                <div class="border border-gray-200 rounded-lg p-3 mb-2 flex items-center">
+                    <input type="checkbox" class="h-4 w-4 text-green-500 rounded mr-3">
+                    <div class="flex-1">
+                        <h4 class="font-medium">土壤湿度传感器</h4>
+                        <p class="text-xs text-gray-500">设备ID: SM-2023-005</p>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="h-2 w-2 rounded-full bg-green-500 mr-1"></span>
+                        <span class="text-xs text-green-600">正常</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 引入统一底部导航栏 -->
+    <div id="footer-container"></div>
+    
+    <!-- JavaScript -->
+    <script src="js/unified-app.js"></script>
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载统一头部
+            fetch('components/unified-header.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('header-container').innerHTML = data;
+                });
+            
+            // 加载统一底部
+            fetch('components/unified-footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('footer-container').innerHTML = data;
+                });
+        });
+
+        // 简单的交互效果
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            alert('任务创建成功！');
+            window.location.href = 'task-management.html';
+        });
+    </script>
+</body>
+</html>

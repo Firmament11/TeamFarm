@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>个人中心 - 智慧农场小程序</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="components/unified-header.html"></script>
+    <script src="components/unified-footer.html"></script>
+    <style>
+        /* 自定义样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f7f8fa;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+            max-width: 414px;
+            margin: 0 auto;
+            position: relative;
+            min-height: 100vh;
+        }
+        .safe-area {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-item.active {
+            color: #07c160;
+        }
+        .nav-item.active .nav-icon {
+            color: #07c160;
+        }
+        .btn-primary {
+            background-color: #07c160;
+        }
+        .btn-primary:hover {
+            background-color: #06ad56;
+        }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .avatar-border {
+            border: 3px solid white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .menu-item {
+            transition: background-color 0.2s;
+        }
+        .menu-item:active {
+            background-color: #f0f0f0;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-success {
+            background-color: rgba(7, 193, 96, 0.1);
+            color: #07c160;
+        }
+        .badge-warning {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: #ff9800;
+        }
+        .badge-danger {
+            background-color: rgba(255, 59, 48, 0.1);
+            color: #ff3b30;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 85%;
+            max-width: 400px;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-green {
+            background-color: #07c160;
+            color: white;
+        }
+        .btn-green:hover {
+            background-color: #06ad56;
+        }
+        .btn-outline {
+            border: 1px solid #d1d5db;
+        }
+        .btn-outline:hover {
+            background-color: #f3f4f6;
+        }
+        .btn-danger {
+            background-color: #ff3b30;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #e0352b;
+        }
+        .notification {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            background-color: #07c160;
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+        .notification.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        .back-to-site {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: #07c160;
+            color: white;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .back-to-site:hover {
+            background-color: #06ad56;
+        }
+        .back-to-site svg {
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body class="safe-area" style="max-width: 414px; margin: 0 auto; position: relative; min-height: 100vh;">
+    <!-- 引入统一顶部导航栏 -->
+    <div id="header-container"></div>
+
+    <!-- 主要内容区域 -->
+    <main class="pb-16">
+        <!-- 用户信息卡片 -->
+        <div class="bg-gradient-to-r from-green-500 to-green-400 p-4 pb-16">
+            <div class="flex items-center">
+                <div class="relative">
+                    <div class="w-20 h-20 rounded-full overflow-hidden bg-white avatar-border">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="用户头像" class="w-full h-full object-cover">
+                    </div>
+                    <div class="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow">
+                        <svg class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-4 text-white">
+                    <h2 class="text-xl font-bold">张农夫</h2>
+                    <p class="text-sm opacity-90">西区水稻田管理员</p>
+                    <div class="flex items-center mt-1">
+                        <span class="text-xs bg-white bg-opacity-30 px-2 py-0.5 rounded-full">高级会员</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 用户数据卡片 -->
+        <div class="px-4 -mt-10">
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="border-r">
+                        <div class="text-xl font-bold">12</div>
+                        <div class="text-xs text-gray-500">管理农田</div>
+                    </div>
+                    <div class="border-r">
+                        <div class="text-xl font-bold">28</div>
+                        <div class="text-xs text-gray-500">完成任务</div>
+                    </div>
+                    <div>
+                        <div class="text-xl font-bold">5</div>
+                        <div class="text-xs text-gray-500">待办事项</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能菜单 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">账户管理</h2>
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="menu-item flex items-center justify-between p-4 border-b" @click="handlePersonalInfo">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                            <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <span>个人资料</span>
+                    </div>
+                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+                <div class="menu-item flex items-center justify-between p-4 border-b">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                            <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <span>账号安全</span>
+                    </div>
+                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+                <div class="menu-item flex items-center justify-between p-4">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                            <svg class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                        </div>
+                        <span>消息通知</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full mr-2">12</span>
+                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 应用功能 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">应用功能</h2>
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="menu-item flex items-center justify-between p-4 border-b">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
+                            <svg class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                        </div>
+                        <span>我的报表</span>
+                    </div>
+                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+                <div class="menu-item flex items-center justify-between p-4 border-b">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                            <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </div>
+                        <span>设备管理</span>
+                    </div>
+                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+                <div class="menu-item flex items-center justify-between p-4 border-b">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                            <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <span>农事日历</span>
+                    </div>
+                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+                <div class="menu-item flex items-center justify-between p-4">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center mr-3">
+                            <svg class="h-5 w-5 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                        </div>
+                        <span>我的订单</span>
+                    </div>
+                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统设置 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">系统设置</h2>
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="menu-item flex items-center justify-between p-4 border-b">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                            <svg class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <span>通用设置</span>
+                    </div>
+                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+                <div class="menu-item flex items-center justify-between p-4 border-b">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                            <svg class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <span>帮助中心</span>
+                    </div>
+                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+                <div class="menu-item flex items-center justify-between p-4" id="logout-btn">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                            <svg class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                        </div>
+                        <span>退出登录</span>
+                    </div>
+                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 版本信息 -->
+        <div class="p-4 text-center text-gray-500 text-xs">
+            <p>智慧农场小程序 v1.0.0</p>
+            <p class="mt-1">© 2025 智慧农田管理平台</p>
+        </div>
+    </main>
+
+    <!-- 引入统一底部导航栏 -->
+    <div id="footer-container"></div>
+    
+    <script src="js/unified-app.js"></script>
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载统一头部
+            fetch('components/unified-header.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('header-container').innerHTML = data;
+                });
+            
+            // 加载统一底部
+            fetch('components/unified-footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('footer-container').innerHTML = data;
+                });
+            
+            // 设置页面标题
+            document.getElementById('page-title').textContent = '个人中心';
+            
+            // 根据当前页面URL设置活动导航项
+            const currentPath = window.location.pathname;
+            const filename = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+            
+            // 移除所有导航项的active类
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.nav-icon').classList.remove('text-green-500');
+                item.querySelector('span').classList.remove('text-green-500');
+            });
+            
+            // 根据当前页面设置活动导航项
+            let activeNavId = null;
+            
+            if (filename === 'home.html' || filename === '') {
+                activeNavId = 'nav-home';
+            } else if (filename.includes('farm-monitor') || filename.includes('farm-video-monitor')) {
+                activeNavId = 'nav-monitor';
+            } else if (filename.includes('task')) {
+                activeNavId = 'nav-task';
+            } else if (filename.includes('data-analysis')) {
+                activeNavId = 'nav-analysis';
+            } else if (filename.includes('profile')) {
+                activeNavId = 'nav-profile';
+            }
+            
+            if (activeNavId) {
+                const activeNav = document.getElementById(activeNavId);
+                if (activeNav) {
+                    activeNav.classList.add('active');
+                    activeNav.querySelector('.nav-icon').classList.add('text-green-500');
+                    activeNav.querySelector('span').classList.add('text-green-500');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

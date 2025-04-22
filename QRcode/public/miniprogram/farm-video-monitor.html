@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实时视频监控 - 智慧农场小程序</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <script src="components/unified-header.html"></script>
+    <script src="components/unified-footer.html"></script>
+    <style>
+        /* 页面特定样式 */
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 宽高比 */
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .camera-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+        .control-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+        .status-live {
+            background-color: #ff3b30;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="safe-area" style="max-width: 414px; margin: 0 auto; position: relative; min-height: 100vh;">
+    <!-- 引入统一顶部导航栏 -->
+    <div id="header-container"></div>
+
+    <!-- 主要内容区域 -->
+    <main class="pb-16">
+        <!-- 摄像头选择器 -->
+        <div class="p-4 bg-white">
+            <div class="relative">
+                <select class="w-full p-2 pr-8 border border-gray-300 rounded-lg appearance-none bg-white">
+                    <option>西区水稻田 - 摄像头1</option>
+                    <option>西区水稻田 - 摄像头2</option>
+                    <option>东区蔬菜大棚 - 摄像头1</option>
+                    <option>南区果园 - 摄像头1</option>
+                    <option>北区试验田 - 摄像头1</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 视频监控区域 -->
+        <div class="p-4">
+            <div class="video-container">
+                <img src="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="农田实时监控" class="w-full h-full object-cover">
+                <div class="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                    <div class="flex items-center">
+                        <span class="status-dot status-live"></span>
+                        实时监控中
+                    </div>
+                </div>
+                <div class="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                    2023-05-15 14:30:45
+                </div>
+            </div>
+
+            <!-- 摄像头控制 -->
+            <div class="camera-controls">
+                <button class="control-btn">
+                    <svg class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span class="text-xs mt-1">截图</span>
+                </button>
+                <button class="control-btn">
+                    <svg class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span class="text-xs mt-1">放大</span>
+                </button>
+                <button class="control-btn">
+                    <svg class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                    </svg>
+                    <span class="text-xs mt-1">缩小</span>
+                </button>
+                <button class="control-btn">
+                    <svg class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span class="text-xs mt-1">旋转</span>
+                </button>
+                <button class="control-btn">
+                    <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-xs mt-1">录制</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 方向控制 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">摄像头控制</h2>
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                    <div></div>
+                    <button class="p-3 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <div></div>
+                    <button class="p-3 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                    <div class="p-3 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <button class="p-3 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div></div>
+                    <button class="p-3 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <div></div>
+                </div>
+                <div class="mt-4">
+                    <h3 class="text-sm font-medium mb-2">变焦控制</h3>
+                    <div class="flex items-center">
+                        <span class="mr-2 text-sm">-</span>
+                        <input type="range" class="flex-1" min="1" max="10" value="5">
+                        <span class="ml-2 text-sm">+</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史记录 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">历史记录</h2>
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="divide-y">
+                    <div class="py-3 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gray-200 rounded-md overflow-hidden mr-3">
+                                <img src="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="录像缩略图" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <div class="font-medium">西区水稻田 - 摄像头1</div>
+                                <div class="text-xs text-gray-500">2023-05-15 10:30 - 11:30</div>
+                            </div>
+                        </div>
+                        <button class="text-sm text-blue-600">
+                            查看
+                        </button>
+                    </div>
+                    <div class="py-3 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gray-200 rounded-md overflow-hidden mr-3">
+                                <img src="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="录像缩略图" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <div class="font-medium">西区水稻田 - 摄像头1</div>
+                                <div class="text-xs text-gray-500">2023-05-14 14:00 - 15:00</div>
+                            </div>
+                        </div>
+                        <button class="text-sm text-blue-600">
+                            查看
+                        </button>
+                    </div>
+                    <div class="py-3 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gray-200 rounded-md overflow-hidden mr-3">
+                                <img src="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="录像缩略图" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <div class="font-medium">东区蔬菜大棚 - 摄像头1</div>
+                                <div class="text-xs text-gray-500">2023-05-13 09:00 - 10:00</div>
+                            </div>
+                        </div>
+                        <button class="text-sm text-blue-600">
+                            查看
+                        </button>
+                    </div>
+                </div>
+                <button class="w-full mt-3 py-2 text-sm text-green-600 font-medium">查看更多记录</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 引入统一底部导航栏 -->
+    <div id="footer-container"></div>
+    
+    <script src="js/unified-app.js"></script>
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载统一头部
+            fetch('components/unified-header.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('header-container').innerHTML = data;
+                });
+            
+            // 加载统一底部
+            fetch('components/unified-footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('footer-container').innerHTML = data;
+                });
+            
+            // 设置页面标题和返回按钮
+            document.getElementById('page-title').textContent = '实时视频监控';
+            document.getElementById('back-button').classList.remove('hidden');
+            document.getElementById('back-button').href = 'farm-monitor.html';
+            
+            // 根据当前页面URL设置活动导航项
+            const currentPath = window.location.pathname;
+            const filename = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+            
+            // 移除所有导航项的active类
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.nav-icon').classList.remove('text-green-500');
+                item.querySelector('span').classList.remove('text-green-500');
+            });
+            
+            // 根据当前页面设置活动导航项
+            let activeNavId = null;
+            
+            if (filename.includes('farm-monitor') || filename.includes('farm-video-monitor')) {
+                activeNavId = 'nav-monitor';
+            }
+            
+            if (activeNavId) {
+                const activeNav = document.getElementById(activeNavId);
+                if (activeNav) {
+                    activeNav.classList.add('active');
+                    activeNav.querySelector('.nav-icon').classList.add('text-green-500');
+                    activeNav.querySelector('span').classList.add('text-green-500');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

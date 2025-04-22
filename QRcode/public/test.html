@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试二维码数据</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>二维码数据测试</h1>
+    <pre id="data"></pre>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('qrcodes.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`服务器响应错误: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const dataElement = document.getElementById('data');
+                    dataElement.textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    console.error('获取二维码数据失败:', error);
+                    alert('无法加载产品信息: ' + error.message);
+                });
+        });
+    </script>
+</body>
+</html>
+
+
+

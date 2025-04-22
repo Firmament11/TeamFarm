@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务管理 - 智慧农场小程序</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="components/unified-header.html"></script>
+    <script src="components/unified-footer.html"></script>
+    <style>
+        /* 自定义样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f7f8fa;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+        }
+        .safe-area {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-item.active {
+            color: #07c160;
+        }
+        .nav-item.active .nav-icon {
+            color: #07c160;
+        }
+        .btn-primary {
+            background-color: #07c160;
+        }
+        .btn-primary:hover {
+            background-color: #06ad56;
+        }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .tab-active {
+            color: #07c160;
+            border-bottom: 2px solid #07c160;
+        }
+        .status-urgent {
+            color: #ff3b30;
+        }
+        .status-normal {
+            color: #007aff;
+        }
+        .status-completed {
+            color: #8e8e93;
+        }
+        .task-item {
+            transition: background-color 0.2s;
+        }
+        .task-item:active {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body class="safe-area" style="max-width: 414px; margin: 0 auto; position: relative; min-height: 100vh;">
+    <!-- 引入统一顶部导航栏 -->
+    <div id="header-container"></div>
+
+    <!-- 主要内容区域 -->
+    <main class="pb-16">
+        <!-- 功能标签页 -->
+        <div class="bg-white">
+            <div class="flex border-b">
+                <button class="flex-1 py-3 text-center text-sm tab-active">全部任务</button>
+                <button class="flex-1 py-3 text-center text-sm text-gray-500">我的任务</button>
+                <button class="flex-1 py-3 text-center text-sm text-gray-500">已完成</button>
+            </div>
+        </div>
+
+        <!-- 搜索框 -->
+        <div class="p-4 bg-white border-b">
+            <div class="relative">
+                <input type="text" class="w-full p-2 pl-10 pr-4 border border-gray-300 rounded-lg" placeholder="搜索任务名称、负责人">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务筛选 -->
+        <div class="p-4 bg-white border-b overflow-x-auto">
+            <div class="flex space-x-3 whitespace-nowrap">
+                <button class="px-3 py-1 text-sm bg-green-500 text-white rounded-full">全部</button>
+                <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full">紧急</button>
+                <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full">普通</button>
+                <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full">西区水稻田</button>
+                <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full">东区蔬菜大棚</button>
+                <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full">南区果园</button>
+            </div>
+        </div>
+
+        <!-- 任务列表 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">今日任务</h2>
+            <div class="bg-white rounded-lg shadow divide-y">
+                <a href="task-detail.html" class="task-item block p-3">
+                    <div class="flex items-center mb-2">
+                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 mr-3 flex-shrink-0"></div>
+                        <div class="flex-1">
+                            <h3 class="font-medium">西区水稻田浇水</h3>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full">紧急</span>
+                    </div>
+                    <div class="pl-9">
+                        <div class="flex justify-between text-sm text-gray-500 mb-2">
+                            <span>时间: 09:00 - 10:00</span>
+                            <span>负责人: 张三</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <div class="flex items-center text-xs text-gray-500">
+                                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>西区水稻田</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden mr-2">
+                                    <div class="h-full bg-green-500 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <span class="text-xs text-gray-500">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                <a href="task-detail.html" class="task-item block p-3">
+                    <div class="flex items-center mb-2">
+                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 mr-3 flex-shrink-0"></div>
+                        <div class="flex-1">
+                            <h3 class="font-medium">东区蔬菜大棚施肥</h3>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">普通</span>
+                    </div>
+                    <div class="pl-9">
+                        <div class="flex justify-between text-sm text-gray-500 mb-2">
+                            <span>时间: 14:00 - 15:00</span>
+                            <span>负责人: 李四</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <div class="flex items-center text-xs text-gray-500">
+                                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>东区蔬菜大棚</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden mr-2">
+                                    <div class="h-full bg-green-500 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <span class="text-xs text-gray-500">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                <div class="task-item block p-3">
+                    <div class="flex items-center mb-2">
+                        <div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-3 flex-shrink-0">
+                            <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-medium line-through text-gray-400">南区果园巡检</h3>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full">已完成</span>
+                    </div>
+                    <div class="pl-9">
+                        <div class="flex justify-between text-sm text-gray-400 mb-2">
+                            <span>时间: 08:00 - 09:00</span>
+                            <span>负责人: 王五</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <div class="flex items-center text-xs text-gray-400">
+                                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>南区果园</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden mr-2">
+                                    <div class="h-full bg-green-500 rounded-full" style="width: 100%"></div>
+                                </div>
+                                <span class="text-xs text-gray-500">100%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 未来任务 -->
+        <div class="p-4">
+            <h2 class="text-lg font-bold mb-3">未来任务</h2>
+            <div class="bg-white rounded-lg shadow divide-y">
+                <div class="task-item block p-3">
+                    <div class="flex items-center mb-2">
+                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 mr-3 flex-shrink-0"></div>
+                        <div class="flex-1">
+                            <h3 class="font-medium">西区水稻田病虫害检查</h3>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">普通</span>
+                    </div>
+                    <div class="pl-9">
+                        <div class="flex justify-between text-sm text-gray-500 mb-2">
+                            <span>时间: 明天 10:00 - 11:30</span>
+                            <span>负责人: 张三</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <div class="flex items-center text-xs text-gray-500">
+                                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>西区水稻田</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden mr-2">
+                                    <div class="h-full bg-gray-400 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <span class="text-xs text-gray-500">未开始</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="task-item block p-3">
+                    <div class="flex items-center mb-2">
+                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 mr-3 flex-shrink-0"></div>
+                        <div class="flex-1">
+                            <h3 class="font-medium">东区蔬菜大棚温度调节</h3>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">普通</span>
+                    </div>
+                    <div class="pl-9">
+                        <div class="flex justify-between text-sm text-gray-500 mb-2">
+                            <span>时间: 明天 16:00 - 17:00</span>
+                            <span>负责人: 李四</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <div class="flex items-center text-xs text-gray-500">
+                                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>东区蔬菜大棚</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden mr-2">
+                                    <div class="h-full bg-gray-400 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <span class="text-xs text-gray-500">未开始</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 引入统一底部导航栏 -->
+    <div id="footer-container"></div>
+    
+    <script src="js/unified-app.js"></script>
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载统一头部
+            fetch('components/unified-header.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('header-container').innerHTML = data;
+                });
+            
+            // 加载统一底部
+            fetch('components/unified-footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('footer-container').innerHTML = data;
+                });
+            
+            // 设置页面标题
+            document.getElementById('page-title').textContent = '任务管理';
+            
+            // 根据当前页面URL设置活动导航项
+            const currentPath = window.location.pathname;
+            const filename = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+            
+            // 移除所有导航项的active类
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.nav-icon').classList.remove('text-green-500');
+                item.querySelector('span').classList.remove('text-green-500');
+            });
+            
+            // 根据当前页面设置活动导航项
+            let activeNavId = null;
+            
+            if (filename === 'home.html' || filename === '') {
+                activeNavId = 'nav-home';
+            } else if (filename.includes('farm-monitor') || filename.includes('farm-video-monitor')) {
+                activeNavId = 'nav-monitor';
+            } else if (filename.includes('task')) {
+                activeNavId = 'nav-task';
+            } else if (filename.includes('data-analysis')) {
+                activeNavId = 'nav-analysis';
+            } else if (filename.includes('profile')) {
+                activeNavId = 'nav-profile';
+            }
+            
+            if (activeNavId) {
+                const activeNav = document.getElementById(activeNavId);
+                if (activeNav) {
+                    activeNav.classList.add('active');
+                    activeNav.querySelector('.nav-icon').classList.add('text-green-500');
+                    activeNav.querySelector('span').classList.add('text-green-500');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

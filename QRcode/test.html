@@ -1,0 +1,994 @@
+index.html 文件<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧农场农产品溯源系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2  "></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js  "></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js  "></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css  " rel="stylesheet">
+    <style>
+        .qrcode-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .bg-pattern {
+            background-color: #f0f8f0;
+            background-image: linear-gradient(rgba(144, 238, 144, 0.1) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(144, 238, 144, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        /* 新增表单输入动画效果 */
+        .form-input:focus {
+            @apply border-green-500 shadow-sm;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus + label {
+            @apply text-green-500;
+        }
+        
+        .map-container {
+            width: 100%;
+            height: 400px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app">
+        <!-- 导航栏 - 固定在顶部 -->
+        <nav class="bg-white shadow-md p-4 sticky top-0 z-50 w-full">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-green-700">智慧农场溯源系统</span>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-green-600 hover:text-green-800">首页</a>
+                    <a href="#" class="text-green-600 hover:text-green-800">关于我们</a>
+                    <a href="#" class="text-green-600 hover:text-green-800">联系我们</a>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container mx-auto px-4 py-8">
+        
+        <!-- 批量处理进度提示 -->
+        <div v-if="uploadStatus.loading" class="bg-blue-100 border-blue-400 text-blue-700 p-4 rounded-lg mb-4">
+            <div class="flex items-center">
+                <svg class="animate-spin h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg  " fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{ uploadStatus.message }}</span>
+            </div>
+        </div>
+
+        <div v-if="uploadStatus.success" class="bg-green-100 border-green-400 text-green-700 p-4 rounded-lg mb-4">
+            <div class="flex items-center">
+                <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg  " fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>{{ uploadStatus.message }}</span>
+            </div>
+        </div>
+
+        <div v-if="uploadStatus.error" class="bg-red-100 border-red-400 text-red-700 p-4 rounded-lg mb-4">
+            <div class="flex items-center">
+                <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg  " fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                <span>{{ uploadStatus.message }}</span>
+            </div>
+        </div>
+
+        <div class="batch-section bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="text-center mb-4">
+                <svg class="mx-auto h-12 w-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                <h3 class="mt-2 text-lg font-semibold text-gray-800">批量生成农作物溯源码</h3>
+                <p class="mt-1 text-sm text-gray-500">请上传包含农作物信息的Excel文件（支持.xlsx格式）</p>
+                <p class="text-xs text-gray-400 mt-2">文件应包含：产品名称、种植地点、种植时间等必要字段</p>
+            </div>
+            <div class="flex flex-col items-center space-y-4">
+                <label class="w-full cursor-pointer">
+                    <input type="file" @change="handleExcelUpload" accept=".xlsx" 
+                        class="upload-input opacity-0 absolute z-0">
+                    <div class="bg-green-50 text-green-700 hover:bg-green-100 px-6 py-3 rounded-md border-2 border-dashed border-green-200 
+                        transition-colors duration-200 w-full text-center flex items-center justify-center">
+                        <span class="mr-2">选择Excel文件</span>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path>
+                        </svg>
+                    </div>
+                </label>
+                <button @click="downloadBatchQRCodes" :disabled="!batchCodes.length" 
+                    class="download-btn bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-md 
+                    transition-colors duration-300 flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 01-3 3H1m0 0l3-3m-3 3V1m5 4a3 3 0 01-3-3H5m0 0a3 3 0 013-3m0 3a3 3 0 003 3h3a3 3 0 003-3m0 3a3 3 0 003-3m0 3a3 3 0 00-3-3m0 3a3 3 0 01-3-3H5a3 3 0 013-3m0 3a3 3 0 013 3h3"></path>
+                    </svg>
+                    打包下载全部二维码
+                </button>
+            </div>
+        </div>
+        <!-- 主要内容 -->
+        <div class="main-content">
+            <div class="container mx-auto px-4">
+                <!-- 生成溯源码部分 -->
+                <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+                    <h2 class="text-2xl font-bold text-center text-green-700 mb-6">生成农产品溯源码</h2>
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 sm:grid-cols-1">
+                            <div class="flex flex-col space-y-2">
+                                <label class="text-gray-700">产品名称 <span class="text-red-500">*</span></label>
+                                <input v-model="product.name" type="text" class="form-input border p-2 rounded-md focus:outline-none" placeholder="请输入产品名称">
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <label class="text-gray-700">种植时间</label>
+                                <input v-model="product.plantingDate" type="date" class="form-input border p-2 rounded-md focus:outline-none">
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <label class="text-gray-700">收获时间</label>
+                                <input v-model="product.harvestDate" type="date" class="form-input border p-2 rounded-md focus:outline-none">
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <label class="text-gray-700">生产批次</label>
+                                <input v-model="product.batchNumber" type="text" class="form-input border p-2 rounded-md focus:outline-none" placeholder="请输入生产批次号">
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <label class="text-gray-700">有机认证</label>
+                                <select v-model="product.organic" class="form-input border p-2 rounded-md focus:outline-none">
+                                    <option :value="false">否</option>
+                                    <option :value="true">是</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <label class="text-gray-700">负责人联系电话</label>
+                                <input v-model="product.contact" type="text" class="form-input border p-2 rounded-md focus:outline-none" placeholder="请输入负责人联系电话">
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <label class="text-gray-700">商品展示视频链接</label>
+                                <input v-model="product.videoUrl" type="url" class="form-input border p-2 rounded-md focus:outline-none" placeholder="请输入或粘贴商品展示视频链接（如优酷、B站、腾讯视频等）">
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <label class="text-gray-700">种植地点</label>
+                                <div class="flex">
+                                    <input v-model="product.location" type="text" class="form-input border p-2 rounded-l-md flex-grow focus:outline-none" placeholder="请输入种植地点">
+                                    <button @click="getLocationByIP" class="bg-green-500 text-white px-3 rounded-r-md hover:bg-green-600 transition-colors duration-300" title="获取当前位置">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p v-if="ipLocation" class="text-xs text-gray-500 mt-1">IP定位: {{ ipLocation }}</p>
+                            </div>
+                            
+                            <!-- 展开/收起按钮 -->
+                            <div class="col-span-2 mt-2">
+                                <button @click="toggleAdvancedFields" class="text-green-600 hover:text-green-800 text-sm flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path v-if="showAdvancedFields" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 11l-5-5m5 5l-5 5"></path>
+                                        <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5-5m0 0l-5 5m5-5v12"></path>
+                                    </svg>
+                                    {{ showAdvancedFields ? '收起高级选项' : '展开高级选项' }}
+                                </button>
+                            </div>
+                            
+                            <!-- 高级字段，可展开/收起 -->
+                            <template v-if="showAdvancedFields">
+                                <div class="flex flex-col space-y-2">
+                                    <label class="text-gray-700">营养成分</label>
+                                    <div class="flex items-center">
+                                        <select v-model="selectedCrop" class="form-input border p-2 rounded-md w-full focus:outline-none" @change="updateNutritionInfo">
+                                            <option value="">请选择农作物</option>
+                                            <optgroup v-for="(crops, category) in cropsData" :label="category">
+                                                <option v-for="(data, crop) in crops" :value="{category, crop}">{{ crop }}</option>
+                                            </optgroup>
+                                        </select>
+                                    </div>
+                                    <div v-if="product.nutritionInfo" class="text-xs text-gray-500 mt-1">
+                                        <p>已自动填充营养成分数据</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- 精准定位选项 -->
+                                <div class="flex flex-col space-y-2">
+                                    <label class="text-gray-700">精准定位</label>
+                                    <div class="flex items-center">
+                                        <button @click="openLocationMap" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors duration-300 flex items-center">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            </svg>
+                                            选择精确位置
+                                        </button>
+                                    </div>
+                                    <div v-if="product.exactLocation" class="text-xs text-gray-500 mt-1">
+                                        <p>已设置精确位置: {{ product.exactLocation.address }}</p>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <!-- 地图弹窗 -->
+                            <div v-if="showLocationMap" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                                <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+                                    <div class="p-4 border-b flex justify-between items-center">
+                                        <h3 class="text-xl font-bold text-green-700">选择精确位置</h3>
+                                        <button @click="closeLocationMap" class="text-gray-500 hover:text-gray-700">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="p-4 flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+                                        <input id="map-address-input" type="text" class="border p-2 rounded-md flex-1" placeholder="请输入地址，如：河南省开封市鼓楼区">
+                                        <button id="map-search-btn" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors duration-300">定位</button>
+                                    </div>
+                                    <div class="flex-grow overflow-hidden">
+                                        <div id="location-map" class="map-container"></div>
+                                    </div>
+                                    <div class="p-4 border-t flex justify-between">
+                                        <p class="text-xs text-gray-500">
+                                            * 右键点击地图任意位置可查看详细地址信息<br>
+                                            * 选择位置后，将使用精确位置替代一般地址
+                                        </p>
+                                        <button @click="confirmLocation" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors duration-300">确认选择</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 加载状态提示 -->
+                            <div class="loading fixed inset-0 bg-white bg-opacity-80 z-[9999] justify-center items-center" id="map-loading" style="display: none;">
+                                <div class="text-4xl text-green-600 animate-spin">🔍</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-center mt-4">
+                            <button @click="generateQRCode" 
+                                :disabled="isGenerating || !product.name" 
+                                class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                                :class="{'opacity-50 cursor-not-allowed': isGenerating || !product.name}">
+                                <span v-if="isGenerating" class="flex items-center">
+                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg  " fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    生成中...
+                                </span>
+                                <span v-else>生成溯源码</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 溯源码展示部分 -->
+                <!-- 隐藏的二维码容器，用于生成二维码 -->
+                <div id="qrcode-container" style="display: none;"></div>
+                
+                <div v-if="qrCode" class="bg-white rounded-lg shadow-md p-4 sm:p-8 fade-in">
+                    <h2 class="text-2xl font-bold text-center text-green-700 mb-6">溯源码信息</h2>
+                    <div class="flex flex-col md:flex-row items-center md:items-start md:space-x-8 space-y-4 md:space-y-0">
+                        <div class="qrcode-container">
+                            <img :src="qrCode" alt="溯源码" class="w-full h-full object-contain">
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500 mb-4">
+                                <h3 class="text-lg font-semibold text-green-700 mb-2">产品基本信息</h3>
+                                <div class="space-y-2">
+                                    <p><span class="font-medium text-gray-600">产品名称:</span> <span class="text-gray-800">{{ product.name }}</span></p>
+                                    <p v-if="product.location"><span class="font-medium text-gray-600">种植地点:</span> <span class="text-gray-800">{{ product.location }}</span></p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 mb-4">
+                                <h3 class="text-lg font-semibold text-blue-700 mb-2">时间信息</h3>
+                                <div class="space-y-2">
+                                    <p v-if="product.plantingDate"><span class="font-medium text-gray-600">种植时间:</span> <span class="text-gray-800">{{ formatDate(product.plantingDate) }}</span></p>
+                                    <p v-if="product.harvestDate"><span class="font-medium text-gray-600">收获时间:</span> <span class="text-gray-800">{{ formatDate(product.harvestDate) }}</span></p>
+                                </div>
+                            </div>
+                            
+                            <div v-if="product.fertilizer" class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500 mb-4">
+                                <h3 class="text-lg font-semibold text-yellow-700 mb-2">施肥记录</h3>
+                                <p class="text-gray-700 whitespace-pre-line">{{ product.fertilizer }}</p>
+                            </div>
+                            
+                            <div v-if="product.pesticide" class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                                <h3 class="text-lg font-semibold text-red-700 mb-2">农药使用</h3>
+                                <p class="text-gray-700 whitespace-pre-line">{{ product.pesticide }}</p>
+                            </div>
+                            <div v-if="product.number" class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
+                                <h3 class="text-lg font-semibold text-purple-700 mb-2">电话号码</h3>
+                                <p class="text-gray-700 whitespace-pre-line">{{ product.number }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 text-center">
+                        <p class="text-sm text-gray-500 mb-2">扫描上方二维码查看详细溯源信息</p>
+                        <button @click="resetForm" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-300 mr-2">
+                            重新生成
+                        </button>
+                        <button @click="downloadQRCode" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors duration-300 mr-2">
+                            <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            下载二维码
+                        </button>
+                        <a :href="detailPageUrl" target="_blank" class="inline-block bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-300">
+                            查看详情页
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="bg-green-800 text-white p-8 mt-8 rounded-lg">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div>
+                        <h3 class="text-xl font-bold">智慧农场溯源系统</h3>
+                        <p>科技赋能农业，智慧创造未来</p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <p>公司网站: <a href="http://www.hl3344.space  " target="_blank" class="underline">www.hl3344.space</a></p>
+                        <p>联系电话: 1862483344</p>
+                    </div>
+                </div>
+                <div class="mt-8 text-center">
+                    <p>© 2025 智慧农场溯源系统. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js  "></script>
+    <!-- 引入高德地图API -->
+    <script src="https://webapi.amap.com/loader.js  "></script>
+    <script>
+        // 高德地图配置
+        window._AMapSecurityConfig = {
+            securityJsCode: 'd923255fe176efb202c35546cbc00a53' // 安全密钥
+        };
+        
+        new Vue({
+            el: '#app',
+            data: {
+                baseUrl: location.origin, // 自动获取当前域名
+                showLocationMap: false, // 控制地图弹窗显示
+                locationMap: null, // 地图实例
+                locationMarker: null, // 地图标记
+                locationGeocoder: null, // 地理编码器
+                locationInfoWindow: null, // 信息窗口
+                selectedLocation: null, // 选中的位置
+                product: {
+                    name: '',
+                    location: '',
+                    plantingDate: '',
+                    exactLocation: null, // 精确位置信息，包含经纬度和地址
+                    batchNumber: '',
+                    certification: '',
+                    organic: false,
+                    storageMethod: '',
+                    nutritionInfo: '',
+                    harvestDate: '',
+                    fertilizer: '',
+                    pesticide: '',
+                    companyName: '',
+                    contact: ''
+                },
+                qrCode: '',
+                batchCodes: [],
+                isGenerating: false,
+                detailPageUrl: '',
+                qrCodeInstance: null,
+                showAdvancedFields: false,
+                cropsData: null,
+                selectedCrop: '',
+                ipLocation: '',
+                ipToken: 'ff142509a16cf4', // IP信息API的token
+                uploadStatus: {
+                    loading: false,
+                    message: '',
+                    success: false,
+                    error: false
+                }
+            },
+            mounted() {
+                // 加载农作物营养成分数据
+                this.loadCropsData();
+            },
+            methods: {
+                // 加载农作物营养成分数据
+                async loadCropsData() {
+                    try {
+                        const response = await fetch('crops_nutrition.json');
+                        if (!response.ok) {
+                            throw new Error('无法加载农作物数据');
+                        }
+                        this.cropsData = await response.json();
+                        console.log('加载农作物数据成功', this.cropsData);
+                    } catch (error) {
+                        console.error('加载农作物数据失败:', error);
+                    }
+                },
+                
+                // 根据选择的农作物更新营养成分信息
+                updateNutritionInfo() {
+                    if (!this.selectedCrop || !this.cropsData) return;
+                    
+                    const { category, crop } = this.selectedCrop;
+                    if (this.cropsData[category] && this.cropsData[category][crop]) {
+                        // 只存储营养成分的数值数组，按固定顺序排列
+                        const nutritionData = this.cropsData[category][crop];
+                        // 确保按照固定顺序提取数值：蛋白质、脂肪、碳水化合物、膳食纤维、维生素C、钙、铁
+                        const nutritionOrder = ['蛋白质', '脂肪', '碳水化合物', '膳食纤维', '维生素C', '钙', '铁'];
+                        const nutritionValues = nutritionOrder.map(key => nutritionData[key] || 0);
+                        
+                        // 将数值数组转换为JSON字符串存储
+                        this.product.nutritionInfo = JSON.stringify(nutritionValues);
+                        console.log('已更新营养成分数据（仅数值）', this.product.nutritionInfo);
+                    }
+                },
+                
+                // 切换显示/隐藏高级字段
+                toggleAdvancedFields() {
+                    this.showAdvancedFields = !this.showAdvancedFields;
+                },
+                
+                // 使用IP获取位置信息
+                getLocationByIP() {
+                    fetch(`http://ipinfo.io/json?token=  ${this.ipToken}`)
+                        .then(response => {
+                            if (response.ok) {
+                                return response.json();
+                            } else {
+                                throw new Error('网络响应错误');
+                            }
+                        })
+                        .then(data => {
+                            this.ipLocation = `${data.city}, ${data.region}, ${data.country}`;
+                            if (!this.product.location) {
+                                this.product.location = this.ipLocation;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('获取IP信息失败:', error);
+                            alert('无法获取位置信息，请手动输入');
+                        });
+                },
+                
+                async generateQRCode() {
+                    console.log('Generating QR code...');
+                    if (!this.product.name) {
+                        alert('请输入产品名称');
+                        return;
+                    }
+                    try {
+                        this.isGenerating = true;
+                        
+                        // 准备营养成分数据 - 直接使用已存储的数值数组
+                        let nutritionValues = [];
+                        if (this.product.nutritionInfo) {
+                            try {
+                                // 直接使用已经按固定顺序存储的数值数组
+                                nutritionValues = JSON.parse(this.product.nutritionInfo);
+                            } catch (e) {
+                                console.error('解析营养成分数据失败:', e);
+                            }
+                        }
+                        
+                        // 准备产品数据，如果有精确位置则使用精确位置替代一般地址
+                        const productData = {
+                            productName: this.product.name,
+                            plantingDate: this.product.plantingDate,
+                            harvestDate: this.product.harvestDate,
+                            batchNumber: this.product.batchNumber,
+                            contact: this.product.contact || '1862483344',
+                            nutritionValues: nutritionValues,
+                            companyWebsite: 'http://www.hl3344.space  ',
+                            videoUrl: this.product.videoUrl || ''
+                        };
+                        
+                        // 如果设置了精确位置，则使用精确位置信息
+                        if (this.product.exactLocation) {
+                            // 优化后的精确位置数据
+                            productData.exactLocation = {
+                                longitude: this.product.exactLocation.longitude,
+                                latitude: this.product.exactLocation.latitude,
+                                address: this.product.exactLocation.address,
+                                region: this.product.exactLocation.region,
+                                city: this.product.exactLocation.city,
+                                district: this.product.exactLocation.district
+                            };
+                            // 不传递普通地址，只使用精确地址
+                        } else {
+                            // 没有精确位置，使用普通地址
+                            productData.location = this.product.location;
+                        }
+                        
+                        console.log('Product Data:', productData);
+                        const encodedData = encodeURIComponent(JSON.stringify(productData));
+                        this.detailPageUrl = `${this.baseUrl}/product-detail.html?data=${encodedData}`;
+                        
+                        // 修改1: 确保容器存在且清空
+                        const qrcodeContainer = document.getElementById('qrcode-container');
+                        if (!qrcodeContainer) {
+                            throw new Error('无法找到二维码容器元素');
+                        }
+                        qrcodeContainer.innerHTML = '';
+                        
+                        // 修改2: 使用Promise确保二维码生成完成
+                        await new Promise((resolve) => {
+                            // 创建一个Image对象用于logo
+                            const logoImage = new Image();
+                            logoImage.crossOrigin = 'Anonymous'; // 解决跨域问题
+                            logoImage.src = './logo.png'; // 假设 logo.png 与当前文件同级
+                            
+                            // 等待logo图片加载完成
+                            logoImage.onload = () => {
+                                this.qrCodeInstance = new QRCode(qrcodeContainer, {
+                                    text: this.detailPageUrl,
+                                    width: 200,
+                                    height: 200,
+                                    colorDark: '#000000',
+                                    colorLight: '#ffffff',
+                                    correctLevel: QRCode.CorrectLevel.H
+                                });
+                                
+                                // 给二维码生成一点时间
+                                setTimeout(() => {
+                                    // 获取生成的二维码图片
+                                    const qrCanvas = qrcodeContainer.querySelector('canvas');
+                                    if (qrCanvas) {
+                                        // 获取canvas上下文
+                                        const ctx = qrCanvas.getContext('2d');
+                                        
+                                        // 计算logo的位置和大小（居中，大小为二维码的1/5）
+                                        const logoSize = qrCanvas.width / 5;
+                                        const logoX = (qrCanvas.width - logoSize) / 2;
+                                        const logoY = (qrCanvas.height - logoSize) / 2;
+                                        
+                                        // 先绘制白色背景（可选）
+                                        ctx.fillStyle = '#FFFFFF';
+                                        ctx.fillRect(logoX - 2, logoY - 2, logoSize + 4, logoSize + 4);
+                                        
+                                        // 绘制logo
+                                        ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
+                                        
+                                        // 更新二维码图片
+                                        const qrImg = qrcodeContainer.querySelector('img');
+                                        if (qrImg) {
+                                            qrImg.src = qrCanvas.toDataURL();
+                                        }
+                                    }
+                                    resolve();
+                                }, 100);
+                            };
+                            
+                            // 处理logo加载失败的情况
+                            logoImage.onerror = () => {
+                                console.error('Logo加载失败');
+                                this.qrCodeInstance = new QRCode(qrcodeContainer, {
+                                    text: this.detailPageUrl,
+                                    width: 200,
+                                    height: 200,
+                                    colorDark: '#000000',
+                                    colorLight: '#ffffff',
+                                    correctLevel: QRCode.CorrectLevel.H
+                                });
+                                setTimeout(resolve, 100);
+                            };
+                        });
+                        
+                        // 修改3: 直接使用二维码实例的_img属性获取图片
+                        if (this.qrCodeInstance && this.qrCodeInstance._el) {
+                            const qrImage = this.qrCodeInstance._el.querySelector('img');
+                            if (qrImage) {
+                                console.log('QR Code img:', qrImage.src);
+                                this.qrCode = qrImage.src;
+                            } else {
+                                throw new Error('二维码图片生成失败');
+                            }
+                        } else {
+                            throw new Error('二维码实例创建失败');
+                        }
+                    } catch (error) {
+                        console.error('生成二维码出错:', error);
+                        alert(`生成二维码出错: ${error.message}`);
+                        this.qrCode = null;
+                    } finally {
+                        this.isGenerating = false;
+                    }
+                },
+    
+                // 新增批量处理方法
+                handleExcelUpload(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    // 显示上传状态
+                    this.uploadStatus = {
+                        loading: true,
+                        message: '正在解析Excel文件...',
+                        success: false,
+                        error: false
+                    };
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, {type: 'array'});
+                            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                            
+                            if (jsonData.length === 0) {
+                                throw new Error('Excel文件中没有数据');
+                            }
+                            
+                            // 检查必要字段
+                            const requiredFields = ['产品名称'];
+                            const missingFields = requiredFields.filter(field => 
+                                !jsonData.some(item => item[field] !== undefined)
+                            );
+                            
+                            if (missingFields.length > 0) {
+                                throw new Error(`Excel文件缺少必要字段: ${missingFields.join(', ')}`);
+                            }
+                            
+                            // 处理数据
+                            this.batchCodes = jsonData.map((item, index) => {
+                                // 为每个产品生成详情页URL
+                                const productData = {
+                                    productName: item.产品名称 || '未命名',
+                                    location: item.种植地点 || '',
+                                    plantingDate: item.种植时间 || '',
+                                    harvestDate: item.收获时间 || '',
+                                    batchNumber: item.生产批次 || '',
+                                    contact: item.联系电话 || '1862483344',
+                                    companyWebsite: 'http://www.hl3344.space  '
+                                };
+                                
+                                const encodedData = encodeURIComponent(JSON.stringify(productData));
+                                const detailUrl = `${this.baseUrl}/product-detail.html?data=${encodedData}`;
+                                
+                                return {
+                                    code: detailUrl,
+                                    name: item.产品名称 || `产品${index+1}`,
+                                    data: productData
+                                };
+                            });
+                            
+                            // 更新上传状态
+                            this.uploadStatus = {
+                                loading: false,
+                                message: `成功解析 ${this.batchCodes.length} 条产品数据`,
+                                success: true,
+                                error: false,
+                                count: this.batchCodes.length
+                            };
+                            
+                        } catch (error) {
+                            console.error('Excel解析失败:', error);
+                            this.uploadStatus = {
+                                loading: false,
+                                message: `文件解析失败: ${error.message}`,
+                                success: false,
+                                error: true
+                            };
+                        }
+                    };
+                    reader.readAsArrayBuffer(file);
+                },
+    
+                async downloadBatchQRCodes() {
+                    if (!this.batchCodes.length) return;
+    
+                    try {
+                        const zip = new JSZip();
+                        const imgFolder = zip.folder('qrcodes');
+                        
+                        // 加载logo图片
+                        const logoImage = new Image();
+                        logoImage.crossOrigin = 'Anonymous'; // 解决跨域问题
+                        logoImage.src = './logo.png'; // 假设 logo.png 与当前文件同级
+                        
+                        // 等待logo加载完成
+                        await new Promise((resolve, reject) => {
+                            logoImage.onload = resolve;
+                            logoImage.onerror = () => {
+                                console.error('Logo加载失败');
+                                resolve(); // 即使logo加载失败也继续
+                            };
+                        });
+    
+                        // 使用本地二维码生成逻辑，不依赖外部服务
+                        await Promise.all(this.batchCodes.map(async (item) => {
+                            // 创建临时容器生成二维码
+                            const tempContainer = document.createElement('div');
+                            document.body.appendChild(tempContainer);
+                            
+                            // 生成二维码
+                            const qrcode = new QRCode(tempContainer, {
+                                text: item.code,
+                                width: 300,
+                                height: 300,
+                                colorDark: '#000000',
+                                colorLight: '#ffffff',
+                                correctLevel: QRCode.CorrectLevel.H
+                            });
+                            
+                            // 添加logo到二维码中心
+                            const qrCanvas = tempContainer.querySelector('canvas');
+                            if (qrCanvas && logoImage.complete) {
+                                const ctx = qrCanvas.getContext('2d');
+                                
+                                // 计算logo的位置和大小（居中，大小为二维码的1/5）
+                                const logoSize = qrCanvas.width / 5;
+                                const logoX = (qrCanvas.width - logoSize) / 2;
+                                const logoY = (qrCanvas.height - logoSize) / 2;
+                                
+                                // 先绘制白色背景
+                                ctx.fillStyle = '#FFFFFF';
+                                ctx.fillRect(logoX - 2, logoY - 2, logoSize + 4, logoSize + 4);
+                                
+                                // 绘制logo
+                                ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
+                            }
+                            
+                            // 将Canvas转换为Blob
+                            const blob = await new Promise((resolve) => {
+                                qrCanvas.toBlob(resolve, 'image/png');
+                            });
+                            
+                            // 将二维码图片添加到压缩包
+                            imgFolder.file(`${item.name}.png`, blob);
+                            
+                            // 清理临时容器
+                            document.body.removeChild(tempContainer);
+                        }));
+    
+                        // 生成压缩包并下载
+                        const content = await zip.generateAsync({type: 'blob'});
+                        const url = window.URL.createObjectURL(content);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'qrcodes.zip';
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+    
+                        // 更新状态为成功
+                        this.uploadStatus = {
+                            loading: false,
+                            message: `成功生成 ${this.batchCodes.length} 个二维码`,
+                            success: true,
+                            error: false
+                        };
+    
+                    } catch (error) {
+                        console.error('打包下载失败:', error);
+                        this.uploadStatus = {
+                            loading: false,
+                            message: '二维码打包失败，请重试',
+                            success: false,
+                            error: true
+                        };
+                    }
+                },
+                
+                resetForm() {
+                    this.qrCode = null;
+                },
+                
+                downloadQRCode() {
+                    if (!this.qrCode) return;
+                    
+                    // 创建一个临时链接元素
+                    const a = document.createElement('a');
+                    a.href = this.qrCode;
+                    a.download = `${this.product.name || '农产品'}_溯源码.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                },
+                
+                formatDate(dateString) {
+                    if (!dateString) return '未设置';
+                    
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) return dateString;
+                    
+                    return date.toLocaleDateString('zh-CN', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                },
+                
+                // 精准定位相关方法
+                openLocationMap() {
+                    this.showLocationMap = true;
+                    // 延迟初始化地图，确保DOM已经渲染
+                    this.$nextTick(() => {
+                        this.initLocationMap();
+                    });
+                },
+                
+                closeLocationMap() {
+                    this.showLocationMap = false;
+                },
+                
+                initLocationMap() {
+                    // 初始化地图
+                    if (!this.locationMap) {
+                        AMapLoader.load({
+                            key: "5ad852daa54b2ec5cc25ea383499b9b3", // 替换为您的 key
+                            version: "2.0", // 指定要加载的 JS API 的版本
+                            plugins: ["AMap.Geocoder", "AMap.Marker"] // 需要使用的插件列表
+                        })
+                        .then(AMap => {
+                            this.locationMap = new AMap.Map("location-map", {
+                                resizeEnable: true,
+                                center: [114.3519, 34.7991], // 默认开封市
+                                zoom: 12
+                            });
+                            
+                            // 初始化地理编码器
+                            this.locationGeocoder = new AMap.Geocoder({
+                                city: "410200", // 开封市行政区划代码
+                                radius: 1000
+                            });
+                            
+                            // 移除默认的右键菜单
+                            this.locationMap.off('rightclick');
+                            
+                            // 地图右键点击事件
+                            this.locationMap.on('rightclick', (e) => {
+                                this.showMapLoading(true);
+                                
+                                this.locationGeocoder.getAddress(e.lnglat, (status, result) => {
+                                    this.showMapLoading(false);
+                                    
+                                    if (status === 'complete' && result.regeocode) {
+                                        const address = result.regeocode.formattedAddress;
+                                        const info = result.regeocode.addressComponent;
+                                        
+                                        const content = `
+                                            <div class="p-2 bg-white rounded shadow info-window">
+                                                <p><strong>完整地址：</strong>${address}</p>
+                                                <p><strong>省份：</strong>${info.province}</p>
+                                                <p><strong>城市：</strong>${info.city}</p>
+                                                <p><strong>区县：</strong>${info.district}</p>
+                                                <p><strong>乡镇：</strong>${info.township}</p>
+                                                <p><strong>详细地址：</strong>${info.street + info.streetNumber}</p>
+                                            </div>
+                                        `;
+                                        
+                                        if (this.locationInfoWindow) {
+                                            this.locationInfoWindow.setContent(content);
+                                            this.locationInfoWindow.setPosition(e.lnglat);
+                                            this.locationInfoWindow.open(this.locationMap);
+                                        } else {
+                                            this.locationInfoWindow = new AMap.InfoWindow({
+                                                content: content,
+                                                position: e.lnglat
+                                            });
+                                            this.locationInfoWindow.open(this.locationMap);
+                                        }
+                                        
+                                        this.updateLocationMarker(e.lnglat);
+                                        this.selectedLocation = {
+                                            lnglat: e.lnglat,
+                                            address: address,
+                                            info: info
+                                        };
+                                    } else {
+                                        alert('获取地址信息失败：' + result.info);
+                                    }
+                                });
+                            });
+                            
+                            // 添加搜索按钮事件
+                            document.getElementById('map-search-btn').addEventListener('click', () => {
+                                const address = document.getElementById('map-address-input').value.trim();
+                                if (address) {
+                                    this.showMapLoading(true);
+                                    this.geocodeAddress(address);
+                                }
+                            });
+                        })
+                        .catch(e => {
+                            console.error('地图加载失败:', e);
+                        });
+                    }
+                },
+                
+                updateLocationMarker(lnglat) {
+                    if (this.locationMarker) {
+                        this.locationMarker.setMap(null);
+                    }
+                    
+                    this.locationMarker = new AMap.Marker({
+                        position: lnglat,
+                        map: this.locationMap,
+                        icon: "https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png  "
+                    });
+                },
+                
+                geocodeAddress(address) {
+                    this.locationGeocoder.getLocation(address, (status, result) => {
+                        this.showMapLoading(false);
+                        
+                        if (status === 'complete' && result.geocodes.length) {
+                            const location = result.geocodes[0].location;
+                            
+                            this.locationMap.setCenter(location);
+                            this.locationMap.setZoom(14);
+                            
+                            this.updateLocationMarker(location);
+                            
+                            // 保存选中的位置
+                            this.selectedLocation = {
+                                lnglat: location,
+                                address: result.geocodes[0].formattedAddress,
+                                info: null
+                            };
+                            
+                            // 显示定位成功提示
+                            setTimeout(() => {
+                                alert(`定位成功！\n位置：${result.geocodes[0].formattedAddress}`);
+                            }, 500);
+                        } else {
+                            alert('定位失败：' + (result.info || status) + '\n请尝试更具体的地址，如"河南省开封市鼓楼区"');
+                        }
+                    });
+                },
+                
+                showMapLoading(show) {
+                    const loading = document.getElementById('map-loading');
+                    loading.style.display = show ? 'flex' : 'none';
+                },
+                
+                confirmLocation() {
+                    if (!this.selectedLocation) {
+                        alert('请先在地图上选择一个位置');
+                        return;
+                    }
+                    
+                    // 保存精确位置信息（优化后）
+                    this.product.exactLocation = {
+                        longitude: this.selectedLocation.lnglat.lng,
+                        latitude: this.selectedLocation.lnglat.lat,
+                        address: this.selectedLocation.address,
+                        region: this.selectedLocation.info?.province,
+                        city: this.selectedLocation.info?.city,
+                        district: this.selectedLocation.info?.district
+                    };
+                    
+                    // 关闭地图弹窗
+                    this.closeLocationMap();
+                    
+                    // 提示用户已选择位置
+                    alert(`已选择位置：${this.product.exactLocation.address}`);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

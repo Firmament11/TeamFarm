@@ -1,0 +1,126 @@
+<!-- 统一顶部导航栏组件 -->
+<header class="sticky top-0 bg-white shadow-sm z-10 safe-area-top">
+    <div class="flex items-center justify-between px-4 py-3">
+        <div class="flex items-center">
+            <!-- 返回按钮，仅在需要时显示 -->
+            <button class="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors" id="back-button">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <!-- 页面标题 -->
+            <h1 class="text-lg font-bold ml-3" id="page-title">智慧农场</h1>
+        </div>
+        <div class="flex space-x-3">
+            <!-- 搜索框 -->
+            <button class="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors" id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </button>
+            <!-- 用户按钮 -->
+            <a href="profile.html" class="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            </a>
+        </div>
+    </div>
+    
+    <!-- 搜索框，默认隐藏 -->
+    <div id="search-container" class="px-4 py-2 bg-white border-t border-gray-100 hidden">
+        <div class="relative">
+            <input type="text" class="w-full p-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="搜索...">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            <button id="close-search" class="absolute inset-y-0 right-0 flex items-center pr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</header>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取当前页面路径和文件名
+        const currentPath = window.location.pathname;
+        const filename = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+        
+        // 设置页面标题
+        const pageTitleElement = document.getElementById('page-title');
+        const backButtonElement = document.getElementById('back-button');
+        
+        // 根据页面设置标题和返回按钮
+        if (filename === 'home.html' || filename === '') {
+            pageTitleElement.textContent = '智慧农场';
+            backButtonElement.style.display = 'none';
+        } else if (filename.includes('farm-monitor')) {
+            pageTitleElement.textContent = '农田监控';
+            backButtonElement.style.display = 'block';
+        } else if (filename.includes('farm-video-monitor')) {
+            pageTitleElement.textContent = '视频监控';
+            backButtonElement.style.display = 'block';
+        } else if (filename.includes('data-analysis')) {
+            pageTitleElement.textContent = '数据分析';
+            backButtonElement.style.display = 'block';
+        } else if (filename.includes('inventory')) {
+            pageTitleElement.textContent = '物资管理';
+            backButtonElement.style.display = 'block';
+        } else if (filename.includes('task') && !filename.includes('task-detail') && !filename.includes('task-management') && !filename.includes('create-task')) {
+            pageTitleElement.textContent = '任务列表';
+            backButtonElement.style.display = 'block';
+        } else if (filename.includes('task-management')) {
+            pageTitleElement.textContent = '任务管理';
+            backButtonElement.style.display = 'block';
+        } else if (filename.includes('create-task')) {
+            pageTitleElement.textContent = '创建任务';
+            backButtonElement.style.display = 'block';
+        } else if (filename.includes('task-detail')) {
+            pageTitleElement.textContent = '任务详情';
+            backButtonElement.style.display = 'block';
+        } else if (filename.includes('profile')) {
+            pageTitleElement.textContent = '个人中心';
+            backButtonElement.style.display = 'block';
+        } else if (filename.includes('login')) {
+            pageTitleElement.textContent = '登录/注册';
+            backButtonElement.style.display = 'none';
+        } else if (filename.includes('admin-dashboard')) {
+            pageTitleElement.textContent = '管理后台';
+            backButtonElement.style.display = 'block';
+        }
+        
+        // 返回按钮功能
+        backButtonElement.addEventListener('click', function() {
+            window.history.back();
+        });
+        
+        // 搜索框交互
+        const searchButton = document.getElementById('search-button');
+        const searchContainer = document.getElementById('search-container');
+        const closeSearch = document.getElementById('close-search');
+        const searchInput = searchContainer.querySelector('input');
+        
+        searchButton.addEventListener('click', function() {
+            searchContainer.classList.remove('hidden');
+            searchInput.focus();
+        });
+        
+        closeSearch.addEventListener('click', function() {
+            searchContainer.classList.add('hidden');
+            searchInput.value = '';
+        });
+        
+        // 点击搜索框外部时关闭搜索框
+        document.addEventListener('click', function(event) {
+            if (!searchContainer.contains(event.target) && event.target !== searchButton) {
+                searchContainer.classList.add('hidden');
+                searchInput.value = '';
+            }
+        });
+    });
+</script>
