@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>登录 - 智慧农场小程序</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.31/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <style>
+        /* 自定义样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f7f8fa;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+            max-width: 100vw;
+            overflow-x: hidden;
+            /* 模拟手机屏幕比例 */
+            max-width: 414px;
+            margin: 0 auto;
+            position: relative;
+            min-height: 100vh;
+        }
+        .safe-area {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-item.active {
+            color: #07c160;
+        }
+        .nav-item.active .nav-icon {
+            color: #07c160;
+        }
+        .btn-primary {
+            background-color: #07c160;
+        }
+        .btn-primary:hover {
+            background-color: #06ad56;
+        }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .login-bg {
+            background: linear-gradient(135deg, #2c9e4b 0%, #8bc34a 100%);
+        }
+        .input-focus:focus {
+            border-color: #07c160;
+            box-shadow: 0 0 0 2px rgba(7, 193, 96, 0.2);
+        }
+        .role-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .role-card.selected {
+            border: 2px solid #07c160;
+            background-color: rgba(7, 193, 96, 0.05);
+        }
+        .animated-icon {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        .login-form-container {
+            max-width: 450px;
+            margin: 0 auto;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #4b5563;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #07c160;
+            box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.2);
+        }
+        .btn-login {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: #07c160;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-login:hover {
+            background-color: #06ad56;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        .social-login-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .social-login-btn:hover {
+            background-color: #f3f4f6;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #d1d5db;
+        }
+        .divider-text {
+            padding: 0 1rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+        }
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 120px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .language-selector {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+        }
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            background-color: #07c160;
+            color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            transform: translateX(200%);
+        }
+        .login-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .login-tab {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            position: relative;
+            color: #6b7280;
+        }
+        .login-tab.active {
+            color: #07c160;
+            font-weight: 600;
+        }
+        .login-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #07c160;
+        }
+        .back-button {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 1);
+            transform: scale(1.1);
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 0.5rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6b7280;
+        }
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .remember-me input {
+            margin-right: 0.5rem;
+        }
+        .qr-login {
+            display: none;
+            text-align: center;
+        }
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 1rem;
+            background-color: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+        }
+        .login-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #d1d5db;
+        }
+        .login-tab {
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        .login-tab.active {
+            color: #07c160;
+            border-bottom-color: #07c160;
+        }
+        /* 返回按钮样式 */
+        .back-to-site {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: #07c160;
+            color: white;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .back-to-site:hover {
+            background-color: #06ad56;
+        }
+        .back-to-site svg {
+            margin-right: 0.5rem;
+        }
+        /* 错误提示样式 */
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        /* 成功提示样式 */
+        .success-message {
+            color: #07c160;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+    </style>
+</head>
+<body class="safe-area">
+    <div id="app" class="min-h-screen bg-gray-50">
+        <!-- 返回按钮 -->
+        <a href="/" class="back-button">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+        </a>
+    <!-- 语言选择器 -->
+    <div class="language-selector">
+        <select class="text-sm px-2 py-1 border border-gray-300 rounded-md">
+            <option value="zh-CN">中文</option>
+            <option value="en-US">English</option>
+        </select>
+    </div>
+
+    <!-- 顶部导航栏 -->
+    <header class="sticky top-0 bg-white shadow-sm z-10">
+        <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center">
+                <a href="javascript:history.back()" class="mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </a>
+                <h1 class="text-lg font-bold">登录</h1>
+            </div>
+            <a href="/vue/src/views/Hello.vue" class="text-sm text-green-600">返回网站</a>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <main class="pb-16">
+        <!-- 登录表单 -->
+        <div class="login-bg text-white p-6 text-center">
+            <div class="animate__animated animate__fadeIn">
+                <img src="/vue/src/assets/logo.png" alt="智慧农场" class="w-16 h-16 mx-auto mb-2">
+                <h2 class="text-2xl font-bold mb-2">智慧农场小程序</h2>
+                <p class="text-sm opacity-90">科技赋能农业，智慧创造未来</p>
+            </div>
+        </div>
+
+        <div class="p-4 login-form-container">
+            <!-- 登录方式切换 -->
+            <div class="login-tabs">
+                <div class="login-tab active" id="account-tab">账号密码登录</div>
+                <div class="login-tab" id="qr-tab">扫码登录</div>
+            </div>
+
+            <!-- 账号密码登录 -->
+            <div id="account-login">
+                <!-- 角色选择 -->
+                <h3 class="text-lg font-medium mb-3">请选择您的角色</h3>
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                    <div class="role-card bg-white rounded-lg shadow p-4 text-center" id="admin-role">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </div>
+                        <div class="text-sm font-medium">管理员</div>
+                    </div>
+                    <div class="role-card bg-white rounded-lg shadow p-4 text-center" id="farmer-role">
+                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="text-sm font-medium">农户</div>
+                    </div>
+                    <div class="role-card bg-white rounded-lg shadow p-4 text-center" id="user-role">
+                        <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <div class="text-sm font-medium">普通用户</div>
+                    </div>
+                </div>
+
+                <!-- 登录表单 -->
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="mb-4">
+                        <label for="username" class="form-label">用户名</label>
+                        <div class="relative">
+                            <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                            <input type="text" id="username" class="form-input pl-10" placeholder="请输入用户名">
+                        </div>
+                        <div class="error-message" id="username-error">请输入有效的用户名</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">密码</label>
+                        <div class="relative">
+                            <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <input type="password" id="password" class="form-input pl-10" placeholder="请输入密码">
+                            <div class="password-toggle" id="password-toggle">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="error-message" id="password-error">密码长度至少为6位</div>
+                    </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="remember-me">
+                            <input type="checkbox" id="remember-me">
+                            <label for="remember-me" class="text-sm">记住我</label>
+                        </div>
+                        <a href="#" class="text-sm text-green-600">忘记密码?</a>
+                    </div>
+                    <button id="login-btn" class="btn-login flex items-center justify-center">
+                        <span>登录</span>
+                        <div class="loading-spinner" id="login-spinner"></div>
+                    </button>
+                    <div class="success-message" id="login-success">登录成功，正在跳转...</div>
+                    <div class="divider">
+                        <div class="divider-text">或者使用</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="social-login-btn">
+                            <svg class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="#1AAD19">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                                <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                            </svg>
+                            微信登录
+                        </button>
+                        <button class="social-login-btn">
+                            <svg class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="#1296DB">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                                <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                            </svg>
+                            支付宝登录
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 没有账号？注册 -->
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-600">还没有账号？<a href="#" class="text-green-600 font-medium">立即注册</a></p>
+                </div>
+            </div>
+
+            <!-- 扫码登录 -->
+            <div id="qr-login" class="qr-login">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium mb-4">微信扫码登录</h3>
+                    <div class="qr-code">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 6h1m-7 7v1m-6-6H4" />
+                        </svg>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-2">请使用微信扫描二维码登录</p>
+                    <p class="text-xs text-gray-500">二维码有效期为2分钟</p>
+                    <button class="mt-4 text-sm text-green-600 flex items-center justify-center mx-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        刷新二维码
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    <script>
+        const { createApp, ref } = Vue;
+
+        createApp({
+            setup() {
+                const activeRole = ref('admin');
+                const username = ref('');
+                const password = ref('');
+                const remember = ref(false);
+
+                const handleLogin = () => {
+                    // 表单验证
+                    if (!username.value || !password.value) {
+                        showNotification('请填写完整的登录信息', 'error');
+                        return;
+                    }
+
+                    // 模拟登录验证
+                    const mockUsers = {
+                        admin: { username: 'admin', password: 'admin123' },
+                        farmer: { username: 'farmer', password: 'farmer123' },
+                        user: { username: 'user', password: 'user123' }
+                    };
+
+                    const currentUser = mockUsers[activeRole.value];
+                    if (currentUser && 
+                        username.value === currentUser.username && 
+                        password.value === currentUser.password) {
+                        // 登录成功
+                        localStorage.setItem('userRole', activeRole.value);
+                        localStorage.setItem('username', username.value);
+                        if (remember.value) {
+                            localStorage.setItem('rememberLogin', 'true');
+                        }
+                        showNotification('登录成功', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1000);
+                    } else {
+                        showNotification('用户名或密码错误', 'error');
+                    }
+                };
+
+                // 显示通知
+                const showNotification = (message, type) => {
+                    const notification = $('<div>')
+                        .addClass('notification animate__animated animate__fadeInRight')
+                        .css({
+                            'background-color': type === 'success' ? '#07c160' : '#dc2626',
+                            'transform': 'translateX(0)'
+                        })
+                        .text(message);
+
+                    $('body').append(notification);
+
+                    setTimeout(() => {
+                        notification.removeClass('animate__fadeInRight').addClass('animate__fadeOutRight');
+                        setTimeout(() => notification.remove(), 1000);
+                    }, 3000);
+                };
+
+                // 检查是否记住登录
+                const checkRememberLogin = () => {
+                    if (localStorage.getItem('rememberLogin') === 'true') {
+                        const savedRole = localStorage.getItem('userRole');
+                        const savedUsername = localStorage.getItem('username');
+                        if (savedRole && savedUsername) {
+                            activeRole.value = savedRole;
+                            username.value = savedUsername;
+                            remember.value = true;
+                        }
+                    }
+                };
+
+                // 页面加载时检查记住登录状态
+                checkRememberLogin();
+
+                return {
+                    activeRole,
+                    username,
+                    password,
+                    remember,
+                    handleLogin
+                };
+            }
+        }).mount('#app');
+    </script>
+
+        <!-- 平台特点 -->
+        <div class="p-4 mt-4">
+            <h3 class="text-lg font-medium mb-4 text-center">平台特点</h3>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="feature-card bg-white rounded-lg shadow p-4 text-center">
+                    <div class="feature-icon bg-green-100 mx-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <h4 class="text-sm font-medium mb-1">安全可靠</h4>
+                    <p class="text-xs text-gray-500">数据加密存储，保障信息安全</p>
+                </div>
+                <div class="feature-card bg-white rounded-lg shadow p-4 text-center">
+                    <div class="feature-icon bg-blue-100 mx-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <h4 class="text-sm font-medium mb-1">高效便捷</h4>
+                    <p class="text-xs text-gray-500">智能化管理，提升工作效率</p>
+                </div>
+                <div class="feature-card bg-white rounded-lg shadow p-4 text-center">
+                    <div class="feature-icon bg-purple-100 mx-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </div>
+                    <h4 class="text-sm font-medium mb-1">数据分析</h4>
+                    <p class="text-xs text-gray-500">专业数据分析，辅助决策</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 帮助与支持 -->
+        <div class="p-4 mt-2">
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-lg font
