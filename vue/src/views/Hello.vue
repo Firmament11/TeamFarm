@@ -48,8 +48,7 @@
                 </svg>
               </a>
               <router-link to="/code" class="hero-btn ml-4">
-                生成溯源码
-              </router-link>
+  生成溯源码</router-link>
               <router-link to="/verify" class="hero-btn ml-4">
                 验证溯源码
               </router-link>
