@@ -41,20 +41,8 @@
     </style>
 </head>
 <body class="safe-area" style="max-width: 414px; margin: 0 auto; position: relative; min-height: 100vh;">
-    <!-- 顶部导航栏 -->
-    <header class="sticky top-0 bg-white shadow-sm z-10">
-        <div class="flex items-center justify-between px-4 py-3">
-            <div class="flex items-center">
-                <a href="task-management.html" class="mr-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </a>
-                <h1 class="text-lg font-bold">创建任务</h1>
-            </div>
-            <button class="px-3 py-1 text-sm bg-green-500 text-white rounded-lg" id="saveBtn">保存</button>
-        </div>
-    </header>
+    <!-- 引入统一顶部导航栏 -->
+    <div id="header-container"></div>
 
     <!-- 主要内容区域 -->
     <main class="pb-16">
@@ -187,6 +175,13 @@
     <script>
         // 页面加载完成后执行
         document.addEventListener('DOMContentLoaded', function() {
+            // 加载统一头部
+            fetch('components/unified-header.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('header-container').innerHTML = data;
+                });
+            
             // 加载统一底部
             fetch('components/unified-footer.html')
                 .then(response => response.text())
@@ -194,9 +189,7 @@
                     document.getElementById('footer-container').innerHTML = data;
                 });
         });
-    </script>
 
-    <script>
         // 简单的交互效果
         document.getElementById('saveBtn').addEventListener('click', function() {
             alert('任务创建成功！');

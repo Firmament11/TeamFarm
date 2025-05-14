@@ -1,0 +1,69 @@
+{
+  "2025-W17": {
+    "weekStart": "2025-04-21T16:00:00.000Z",
+    "weekEnd": "2025-04-28T16:00:00.000Z",
+    "products": {
+      "product_1": {
+        "productId": "product_1",
+        "productDataUrl": "/product-detail.html?data=%7B%22productName%22%3A%22%E4%BA%94%E5%B8%B8%E5%A4%A7%E7%B1%B3%22%2C%22plantingDate%22%3A%222024-05-20%22%2C%22harvestDate%22%3A%222024-10-17%22%2C%22batchNumber%22%3A%22P101010%22%2C%22contact%22%3A%2210086%22%2C%22nutritionValues%22%3A%5B7.1%2C0.7%2C77.8%2C0.6%2C0%2C10%2C1.4%5D%2C%22companyWebsite%22%3A%22http%3A%2F%2Fwww.hl3344.space%22%2C%22videoUrl%22%3A%22https%3A%2F%2Fwww.bilibili.com%2Fvideo%2FBV12dbSeSEt7%2F%3Fshare_source%3Dcopy_web%26vd_source%3D5e78d91e42090a493ed7ddf7f5f3b755%22%2C%22exactLocation%22%3A%7B%22longitude%22%3A126.616458%2C%22latitude%22%3A45.759638%2C%22address%22%3A%22%E9%BB%91%E9%BE%99%E6%B1%9F%E7%9C%81%E5%93%88%E5%B0%94%E6%BB%A8%E5%B8%82%E9%81%93%E9%87%8C%E5%8C%BA%E6%96%B0%E9%98%B3%E8%B7%AF%E8%A1%97%E9%81%93%E5%AE%89%E5%8D%87%E8%A1%97%22%2C%22region%22%3A%22%E9%BB%91%E9%BE%99%E6%B1%9F%E7%9C%81%22%2C%22city%22%3A%22%E5%93%88%E5%B0%94%E6%BB%A8%E5%B8%82%22%2C%22district%22%3A%22%E9%81%93%E9%87%8C%E5%8C%BA%22%7D%7D",
+        "productName": "五常大米",
+        "createdAt": "2025-04-20T09:17:24.769Z"
+      },
+      "product_2": {
+        "productId": "product_2",
+        "productDataUrl": "/product-detail.html?data=%7B%22productName%22%3A%22%E4%BA%94%E5%B8%B8%E5%A4%A7%E7%B1%B3%22%2C%22plantingDate%22%3A%222024-05-21%22%2C%22harvestDate%22%3A%222024-10-21%22%2C%22batchNumber%22%3A%22P1001%22%2C%22contact%22%3A%2210010%22%2C%22nutritionValues%22%3A%5B7.1%2C0.7%2C77.8%2C0.6%2C0%2C10%2C1.4%5D%2C%22companyWebsite%22%3A%22http%3A%2F%2Fwww.hl3344.space%22%2C%22videoUrl%22%3A%22https%3A%2F%2Fwww.bilibili.com%2Fvideo%2FBV12dbSeSEt7%2F%3Fshare_source%3Dcopy_web%26vd_source%3D5e78d91e42090a493ed7ddf7f5f3b755%22%2C%22exactLocation%22%3A%7B%22longitude%22%3A123.955423%2C%22latitude%22%3A41.881121%2C%22address%22%3A%22%E8%BE%BD%E5%AE%81%E7%9C%81%E6%8A%9A%E9%A1%BA%E5%B8%82%E9%A1%BA%E5%9F%8E%E5%8C%BA%E9%95%BF%E6%98%A5%E8%A1%97%E9%81%93%E6%8A%9A%E9%A1%BA%E5%B8%82%E5%BA%94%E6%80%A5%E7%AE%A1%E7%90%86%E5%B1%80%E7%A4%BE%E4%BF%9D%E5%A4%A7%E5%8E%A6%22%2C%22region%22%3A%22%E8%BE%BD%E5%AE%81%E7%9C%81%22%2C%22city%22%3A%22%E6%8A%9A%E9%A1%BA%E5%B8%82%22%2C%22district%22%3A%22%E9%A1%BA%E5%9F%8E%E5%8C%BA%22%7D%7D",
+        "productName": "五常大米",
+        "createdAt": "2025-04-21T01:04:58.206Z"
+      },
+      "product_3": {
+        "productId": "product_3",
+        "productDataUrl": "/product-detail.html?data=%7B%22productName%22%3A%22%E5%B0%8F%E7%B1%B3%22%2C%22plantingDate%22%3A%22%22%2C%22harvestDate%22%3A%22%22%2C%22batchNumber%22%3A%22%22%2C%22contact%22%3A%221862483344%22%2C%22nutritionValues%22%3A%5B12.6%2C2%2C71.2%2C12.2%2C0%2C34%2C3.6%5D%2C%22companyWebsite%22%3A%22http%3A%2F%2Fwww.hl3344.space%22%2C%22videoUrl%22%3A%22%22%2C%22location%22%3A%22%22%7D",
+        "productName": "小米",
+        "createdAt": "2025-04-21T01:16:10.298Z"
+      },
+      "product_4": {
+        "productId": "product_4",
+        "productDataUrl": "/product-detail.html?data=%7B%22productName%22%3A%221%22%2C%22plantingDate%22%3A%22%22%2C%22harvestDate%22%3A%22%22%2C%22batchNumber%22%3A%22%22%2C%22contact%22%3A%221862483344%22%2C%22nutritionValues%22%3A%5B%5D%2C%22companyWebsite%22%3A%22http%3A%2F%2Fwww.hl3344.space%22%2C%22videoUrl%22%3A%22%22%2C%22location%22%3A%22%22%7D",
+        "productName": "1",
+        "createdAt": "2025-04-21T04:08:44.077Z"
+      },
+      "product_5": {
+        "productId": "product_5",
+        "productDataUrl": "/product-detail.html?data=%7B%22productName%22%3A%221%22%2C%22plantingDate%22%3A%22%22%2C%22harvestDate%22%3A%22%22%2C%22batchNumber%22%3A%22%22%2C%22contact%22%3A%221862483344%22%2C%22nutritionValues%22%3A%5B7.1%2C0.7%2C77.8%2C0.6%2C0%2C10%2C1.4%5D%2C%22companyWebsite%22%3A%22http%3A%2F%2Fwww.hl3344.space%22%2C%22videoUrl%22%3A%22%22%2C%22location%22%3A%22%22%7D",
+        "productName": "1",
+        "createdAt": "2025-04-21T06:30:18.395Z"
+      },
+      "product_6": {
+        "productId": "product_6",
+        "productDataUrl": "/product-detail.html?data=%7B%22productName%22%3A%22%E4%BA%94%E5%B8%B8%E5%A4%A7%E7%B1%B3%22%2C%22plantingDate%22%3A%222025-04-02%22%2C%22harvestDate%22%3A%222025-04-21%22%2C%22batchNumber%22%3A%22P1001%22%2C%22contact%22%3A%22100101%22%2C%22nutritionValues%22%3A%5B7.1%2C0.7%2C77.8%2C0.6%2C0%2C10%2C1.4%5D%2C%22companyWebsite%22%3A%22http%3A%2F%2Fwww.hl3344.space%22%2C%22videoUrl%22%3A%22https%3A%2F%2Fwww.bilibili.com%2Fvideo%2FBV12dbSeSEt7%2F%3Fshare_source%3Dcopy_web%26vd_source%3D5e78d91e42090a493ed7ddf7f5f3b755%22%2C%22exactLocation%22%3A%7B%22longitude%22%3A114.329813%2C%22latitude%22%3A34.803275%2C%22address%22%3A%22%E6%B2%B3%E5%8D%97%E7%9C%81%E5%BC%80%E5%B0%81%E5%B8%82%E9%BE%99%E4%BA%AD%E5%8C%BA%E6%A2%81%E8%8B%91%E8%A1%97%E9%81%93%E8%A5%BF%E7%8E%AF%E5%9F%8E%E8%B7%AF%E5%8C%97%E6%AE%B5%E5%98%89%E6%BA%90%E5%B0%8F%E5%8C%BA%22%2C%22region%22%3A%22%E6%B2%B3%E5%8D%97%E7%9C%81%22%2C%22city%22%3A%22%E5%BC%80%E5%B0%81%E5%B8%82%22%2C%22district%22%3A%22%E9%BE%99%E4%BA%AD%E5%8C%BA%22%7D%7D",
+        "productName": "五常大米",
+        "createdAt": "2025-04-21T06:38:06.787Z"
+      },
+      "product_7": {
+        "productId": "product_7",
+        "productDataUrl": "/product-detail.html?data=%7B%22productName%22%3A%22%E8%A5%BF%E7%BA%A2%E6%9F%BF%22%2C%22plantingDate%22%3A45672%2C%22harvestDate%22%3A45797%2C%22batchNumber%22%3A%22B202501%22%2C%22contact%22%3A%221862483344%22%2C%22nutritionValues%22%3A%5B%5D%2C%22companyWebsite%22%3A%22http%3A%2F%2Fwww.hl3344.space%22%2C%22videoUrl%22%3A%22%22%2C%22location%22%3A%22%E5%8C%97%E4%BA%AC%E5%B8%82%22%7D",
+        "productName": "西红柿",
+        "createdAt": "2025-04-21T06:42:26.779Z"
+      },
+      "product_8": {
+        "productId": "product_8",
+        "productDataUrl": "/product-detail.html?data=%7B%22productName%22%3A%22%E9%BB%84%E7%93%9C%22%2C%22plantingDate%22%3A45698%2C%22harvestDate%22%3A45823%2C%22batchNumber%22%3A%22B202502%22%2C%22contact%22%3A%221862483344%22%2C%22nutritionValues%22%3A%5B%5D%2C%22companyWebsite%22%3A%22http%3A%2F%2Fwww.hl3344.space%22%2C%22videoUrl%22%3A%22%22%2C%22location%22%3A%22%E4%B8%8A%E6%B5%B7%E5%B8%82%22%7D",
+        "productName": "黄瓜",
+        "createdAt": "2025-04-21T06:42:26.792Z"
+      },
+      "product_9": {
+        "productId": "product_9",
+        "productDataUrl": "/product-detail.html?data=%7B%22productName%22%3A%22%E7%94%9F%E8%8F%9C%22%2C%22plantingDate%22%3A45721%2C%22harvestDate%22%3A45848%2C%22batchNumber%22%3A%22B202503%22%2C%22contact%22%3A%221862483344%22%2C%22nutritionValues%22%3A%5B%5D%2C%22companyWebsite%22%3A%22http%3A%2F%2Fwww.hl3344.space%22%2C%22videoUrl%22%3A%22%22%2C%22location%22%3A%22%E5%B9%BF%E5%B7%9E%E5%B8%82%22%7D",
+        "productName": "生菜",
+        "createdAt": "2025-04-21T06:42:26.802Z"
+      },
+      "product_10": {
+        "productId": "product_10",
+        "productDataUrl": "/product-detail.html?data=%7B%22productName%22%3A%22%E8%8C%84%E5%AD%90%22%2C%22plantingDate%22%3A45767%2C%22harvestDate%22%3A45894%2C%22batchNumber%22%3A%22B202504%22%2C%22contact%22%3A%221862483344%22%2C%22nutritionValues%22%3A%5B%5D%2C%22companyWebsite%22%3A%22http%3A%2F%2Fwww.hl3344.space%22%2C%22videoUrl%22%3A%22%22%2C%22location%22%3A%22%E6%B7%B1%E5%9C%B3%E5%B8%82%22%7D",
+        "productName": "茄子",
+        "createdAt": "2025-04-21T06:42:26.807Z"
+      }
+    },
+    "nextId": 11
+  }
+}

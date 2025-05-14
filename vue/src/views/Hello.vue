@@ -47,8 +47,7 @@
                   <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
               </a>
-              <router-link to="/code" class="hero-btn ml-4">
-  生成溯源码</router-link>
+              <a href="http://localhost:801" class="hero-btn ml-4">生成溯源码</a>
               <router-link to="/verify" class="hero-btn ml-4">
                 验证溯源码
               </router-link>

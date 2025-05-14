@@ -28,14 +28,6 @@
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
-        .weather-card {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-        .task-card {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            color: white;
-        }
         .status-good {
             color: #07c160;
         }
@@ -48,8 +40,8 @@
     </style>
 </head>
 <body class="safe-area" style="max-width: 414px; margin: 0 auto; position: relative; min-height: 100vh;">
-    <!-- 统一顶部导航栏 -->
-    <script src="components/unified-header.html"></script>
+    <!-- 引入统一顶部导航栏 -->
+    <div id="header-container"></div>
 
     <!-- 主要内容区域 -->
     <main class="pb-16">
@@ -78,7 +70,7 @@
             <div class="grid grid-cols-4 gap-4 text-center">
                 <a href="farm-monitor.html" class="flex flex-col items-center">
                     <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
@@ -86,7 +78,7 @@
                 </a>
                 <a href="data-analysis.html" class="flex flex-col items-center">
                     <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                     </div>
@@ -94,7 +86,7 @@
                 </a>
                 <a href="inventory.html" class="flex flex-col items-center">
                     <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mb-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
                     </div>
@@ -102,7 +94,7 @@
                 </a>
                 <a href="task.html" class="flex flex-col items-center">
                     <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                     </div>
@@ -209,28 +201,28 @@
                         <p>多云转晴</p>
                         <p class="text-sm">郑州市中原区</p>
                     </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
                     </svg>
                 </div>
                 <div class="flex justify-between text-center">
                     <div>
                         <p class="text-sm">明天</p>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
                         <p class="text-sm">28°C</p>
                     </div>
                     <div>
                         <p class="text-sm">后天</p>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
                         </svg>
                         <p class="text-sm">25°C</p>
                     </div>
                     <div>
                         <p class="text-sm">周三</p>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
                         <p class="text-sm">27°C</p>
@@ -266,49 +258,65 @@
         </div>
     </main>
 
-    <!-- Vue实例 -->
-    <script>
-        const { createApp, ref, onMounted } = Vue;
-
-        createApp({
-            setup() {
-                const username = ref('');
-                const userRole = ref('');
-
-                onMounted(() => {
-                    // 检查登录状态
-                    const savedUsername = localStorage.getItem('username');
-                    const savedRole = localStorage.getItem('userRole');
-                    if (!savedUsername || !savedRole) {
-                        window.location.href = 'home.html';
-                        return;
-                    }
-                    username.value = savedUsername;
-                    userRole.value = savedRole;
-                });
-
-                const handleLogout = () => {
-                    localStorage.removeItem('username');
-                    localStorage.removeItem('userRole');
-                    localStorage.removeItem('rememberLogin');
-                    window.location.href = 'home.html';
-                };
-
-                return {
-                    username,
-                    userRole,
-                    handleLogout
-                };
-            }
-        }).mount('body');
-    </script>
-
-    <!-- 统一底部导航栏 -->
-    <script src="components/unified-footer.html"></script>
+    <!-- 引入统一底部导航栏 -->
+    <div id="footer-container"></div>
     
-    <!-- 引入交互脚本 -->
-    <script src="js/app.js"></script>
-    <!-- 统一底部导航栏 -->
-    <script src="components/unified-footer.html"></script>
+    <script src="js/unified-app.js"></script>
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载统一头部
+            fetch('components/unified-header.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('header-container').innerHTML = data;
+                });
+            
+            // 加载统一底部
+            fetch('components/unified-footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('footer-container').innerHTML = data;
+                });
+            
+            // 设置页面标题
+            document.getElementById('page-title').textContent = '智慧农场小程序';
+            
+            // 根据当前页面URL设置活动导航项
+            const currentPath = window.location.pathname;
+            const filename = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+            
+            // 移除所有导航项的active类
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.nav-icon').classList.remove('text-green-500');
+                item.querySelector('span').classList.remove('text-green-500');
+            });
+            
+            // 根据当前页面设置活动导航项
+            let activeNavId = null;
+            
+            if (filename === 'home.html' || filename === '') {
+                activeNavId = 'nav-home';
+            } else if (filename.includes('farm-monitor') || filename.includes('farm-video-monitor')) {
+                activeNavId = 'nav-monitor';
+            } else if (filename.includes('task')) {
+                activeNavId = 'nav-task';
+            } else if (filename.includes('data-analysis')) {
+                activeNavId = 'nav-analysis';
+            } else if (filename.includes('profile')) {
+                activeNavId = 'nav-profile';
+            }
+            
+            if (activeNavId) {
+                const activeNav = document.getElementById(activeNavId);
+                if (activeNav) {
+                    activeNav.classList.add('active');
+                    activeNav.querySelector('.nav-icon').classList.add('text-green-500');
+                    activeNav.querySelector('span').classList.add('text-green-500');
+                }
+            }
+        });
+    </script>
 </body>
 </html>

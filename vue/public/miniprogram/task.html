@@ -107,7 +107,7 @@
             </div>
         </div>
 
-        <!-- 搜索栏 -->
+        <!-- 搜索框 -->
         <div class="p-4 bg-white border-b">
             <div class="relative">
                 <input type="text" class="w-full p-2 pl-10 pr-4 border border-gray-300 rounded-lg" placeholder="搜索任务名称、负责人">
@@ -166,7 +166,7 @@
                                 </svg>
                                 <span>西区水稻田</span>
                             </div>
-                            <button class="text-xs text-blue-500">查看详情</button>
+                            <button class="text-xs text-blue-500" onclick="window.location.href='task-detail.html'">查看详情</button>
                         </div>
                     </div>
                 </div>
@@ -191,7 +191,7 @@
                                 </svg>
                                 <span>东区蔬菜大棚</span>
                             </div>
-                            <button class="text-xs text-blue-500">查看详情</button>
+                            <button class="text-xs text-blue-500" onclick="window.location.href='task-detail.html'">查看详情</button>
                         </div>
                     </div>
                 </div>
@@ -216,7 +216,7 @@
                                 </svg>
                                 <span>南区果园</span>
                             </div>
-                            <button class="text-xs text-blue-500">查看详情</button>
+                            <button class="text-xs text-blue-500" onclick="window.location.href='task-detail.html'">查看详情</button>
                         </div>
                     </div>
                 </div>
@@ -536,7 +536,7 @@
             });
         }
         
-        // 搜索任务
+        // 搜索功能
         function searchTasks(searchTerm) {
             const allTasks = document.querySelectorAll('.task-item');
             

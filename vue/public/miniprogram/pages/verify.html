@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧农场扫码系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <!-- 引入 uView UI -->
+    <link href="https://cdn.jsdelivr.net/npm/uview-ui@2.9.6/lib/uview-ui.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/uview-ui@2.9.6/lib/uview-ui.js"></script>
+    <!-- 引入 navnav+ -->
+    <link href="https://cdn.jsdelivr.net/npm/navnav@1.1.2/dist/navnav.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/navnav@1.1.2/dist/navnav.min.js"></script>
+    <style>
+        .scan-area {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px dashed #4CAF50;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px auto;
+            max-width: 500px;
+        }
+        .scan-preview {
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            border-radius: 8px;
+            display: none;
+        }
+        .custom-card {
+            --primary-color: #4CAF50;
+            --hover-scale: 1.02;
+            --transition-speed: 0.3s;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease, background-color var(--transition-speed) ease;
+        }
+        .custom-card:hover {
+            transform: scale(var(--hover-scale));
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            background-color: rgba(76, 175, 80, 0.05);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+<div id="app">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md p-4 sticky top-0 z-50 w-full">
+        <div class="container mx-auto flex flex-wrap justify-between items-center">
+            <div class="flex items-center">
+                <span class="text-xl font-bold text-green-700">智慧农场扫码系统</span>
+            </div>
+            <div class="flex space-x-2 md:space-x-4 text-sm md:text-base">
+                <a href="#" class="text-green-600 hover:text-green-800 px-2 py-1">首页</a>
+                <a href="#" class="text-green-600 hover:text-green-800 px-2 py-1">帮助</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- 批量处理提示 -->
+        <div v-if="uploadStatus.loading" class="bg-blue-100 border-blue-400 text-blue-700 p-4 rounded-lg mb-4">
+            <div class="flex items-center">
+                <svg class="animate-spin h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{ uploadStatus.message }}</span>
+            </div>
+        </div>
+
+        <div v-if="uploadStatus.success" class="bg-green-100 border-green-400 text-green-700 p-4 rounded-lg mb-4">
+            <div class="flex items-center">
+                <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>{{ uploadStatus.message }}</span>
+            </div>
+        </div>
+
+        <div v-if="uploadStatus.error" class="bg-red-100 border-red-400 text-red-700 p-4 rounded-lg mb-4">
+            <div class="flex items-center">
+                <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                <span>{{ uploadStatus.message }}</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 图片扫码区域 -->
+            <div class="custom-card bg-white rounded-lg shadow-md p-6 mb-8">
+                <div class="scan-area bg-gray-50 p-6 rounded-lg" @dragover.prevent @drop.prevent="handleDrop">
+                    <h4 class="text-lg font-semibold text-gray-700 mb-3">图片扫码</h4>
+                    <label class="block cursor-pointer">
+                        <input type="file" @change="handleImageUpload" accept="image/*"
+                               class="hidden">
+                        <u-button type="success" icon="https://img.uviewui.com/2021/12/22/1640174705284.png" class="w-full">
+                            选择图片文件
+                        </u-button>
+                    </label>
+                    <p class="mt-2 text-sm text-gray-500">或拖拽图片文件到此处</p>
+                    <div class="mt-4">
+                        <img id="preview" class="scan-preview" alt="扫码预览">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 批量扫码区域 -->
+            <div class="custom-card bg-white rounded-lg shadow-md p-6 mb-8">
+                <div class="scan-area bg-gray-50 p-6 rounded-lg">
+                    <h4 class="text-lg font-semibold text-gray-700 mb-3">批量扫码</h4>
+                    <label class="block cursor-pointer">
+                        <input type="file" @change="handleZipUpload" accept=".zip"
+                               class="hidden">
+                        <u-button type="primary" icon="https://img.uviewui.com/2021/12/22/1640174705284.png" class="w-full">
+                            选择压缩包文件
+                        </u-button>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 摄像头扫码区域 -->
+            <div class="custom-card bg-white rounded-lg shadow-md p-6 mb-8">
+                <div class="scan-area bg-gray-50 p-6 rounded-lg">
+                    <h4 class="text-lg font-semibold text-gray-700 mb-3">摄像头扫码</h4>
+                    <u-button type="warning" @click="startCamera" icon="https://img.uviewui.com/2021/12/22/1640174705284.png" class="w-full">
+                        打开摄像头
+                    </u-button>
+                    <div class="mt-4">
+                        <video id="camera-view" width="100%" height="200" autoplay playsinline></video>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 扫码结果区域 -->
+        <div class="custom-card bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex justify-between items-center mb-3">
+                <h4 class="text-lg font-semibold text-gray-700">扫码结果</h4>
+                <u-button size="mini" @click="historyResults = JSON.parse(localStorage.getItem('scanHistory') || '[]')">刷新历史</u-button>
+            </div>
+            <div v-if="scanResults.length === 0 && historyResults.length === 0" class="text-center py-6 text-gray-500">
+                <u-empty mode="list" description="暂无扫码结果"></u-empty>
+            </div>
+            <div v-else class="space-y-4">
+                <div v-if="scanResults.length > 0">
+                    <h5 class="text-md font-medium text-gray-600 mb-2">本次扫码结果</h5>
+                    <div v-for="(result, index) in scanResults" :key="'current-' + index" class="bg-white border-b border-gray-200 p-4 rounded">
+                        <div class="text-gray-700">
+                            <strong>二维码 {{ index + 1 }}:</strong>
+                            <span class="break-all">{{ result }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="historyResults.length > 0">
+                    <h5 class="text-md font-medium text-gray-600 mb-2">历史记录</h5>
+                    <div v-for="(item, index) in historyResults" :key="'history-' + index" class="bg-white border-b border-gray-200 p-4 rounded">
+                        <div class="text-gray-700">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <strong>{{ item.timestamp }}:</strong>
+                                    <span class="break-all">{{ item.result }}</span>
+                                </div>
+                                <u-button size="mini" type="primary" @click="redirectToProductPage(item.result)">查看详情</u-button>
+                            </div>
+                            <div class="mt-2 text-sm text-gray-500">
+                                <span v-if="isValidUrl(item.result)">有效URL</span>
+                                <span v-else>文本内容</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            scanResults: [],
+            uploadStatus: {
+                loading: false,
+                message: '',
+                success: false,
+                error: false
+            },
+            cameraActive: false,
+            cameraStream: null,
+            historyResults: JSON.parse(localStorage.getItem('scanHistory') || '[]')
+        },
+        methods: {
+            handleDrop(e) {
+                e.preventDefault();
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                    const event = { target: { files: [file] } };
+                    this.handleImageUpload(event);
+                }
+            },
+            
+            isValidUrl(string) {
+                try {
+                    new URL(string);
+                    return true;
+                } catch (_) {
+                    return false;
+                }
+            },
+            
+            redirectToProductPage(result) {
+                if (this.isValidUrl(result)) {
+                    // 如果是URL直接跳转
+                    window.open(result, '_blank');
+                } else {
+                    // 否则跳转到p.html页面并传递结果作为参数
+                    const encodedResult = encodeURIComponent(result);
+                    window.open(`p.html?id=${encodedResult}`, '_blank');
+                }
+            },
+            
+            saveToHistory(result) {
+                this.historyResults.unshift({
+                    result: result,
+                    timestamp: new Date().toLocaleString()
+                });
+                localStorage.setItem('scanHistory', JSON.stringify(this.historyResults));
+            },
+            
+            handleImageUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // 显示上传状态
+                this.uploadStatus = {
+                    loading: true,
+                    message: '正在解析二维码...',
+                    success: false,
+                    error: false
+                };
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                                inversionAttempts: 'alwaysInvert'
+                            });
+
+                            if (code) {
+                                this.scanResults.push(code.data);
+                                this.saveToHistory(code.data);
+                                this.uploadStatus = {
+                                    loading: false,
+                                    message: '扫码成功！',
+                                    success: true,
+                                    error: false
+                                };
+                                uToast('扫码成功！');
+                            } else {
+                                throw new Error('未检测到有效二维码');
+                            }
+                        };
+                        img.src = e.target.result;
+                        document.getElementById('preview').src = e.target.result;
+                        document.getElementById('preview').style.display = 'block';
+                    } catch (error) {
+                        console.error('扫码失败:', error);
+                        this.uploadStatus = {
+                            loading: false,
+                            message: '扫码失败: ' + error.message,
+                            success: false,
+                            error: true
+                        };
+                        uToast('扫码失败: ' + error.message, {
+                            type: 'error'
+                        });
+                    }
+                };
+                reader.readAsDataURL(file);
+            },
+
+            async handleZipUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // 显示上传状态
+                this.uploadStatus = {
+                    loading: true,
+                    message: '正在解析压缩包...',
+                    success: false,
+                    error: false
+                };
+
+                try {
+                    const data = await JSZip.loadAsync(file);
+                    const files = Object.values(data.files).filter(file => file.name.toLowerCase().endsWith('.jpg') ||
+                        file.name.toLowerCase().endsWith('.jpeg') ||
+                        file.name.toLowerCase().endsWith('.png'));
+
+                    if (!files.length) {
+                        throw new Error('压缩包中没有图片文件');
+                    }
+
+                    await Promise.all(files.map(async (zipFile) => {
+                        try {
+                            const imgData = await zipFile.async('blob');
+                            const reader = new FileReader();
+
+                            return new Promise((resolve) => {
+                                reader.onload = (e) => {
+                                    try {
+                                        const img = new Image();
+                                        img.onload = () => {
+                                            const canvas = document.createElement('canvas');
+                                            const ctx = canvas.getContext('2d');
+                                            canvas.width = img.width;
+                                            canvas.height = img.height;
+                                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                                                inversionAttempts: 'alwaysInvert'
+                                            });
+
+                                            if (code) {
+                                                this.scanResults.push(code.data);
+                                                this.saveToHistory(code.data);
+                                            }
+                                            resolve();
+                                        };
+                                        img.src = e.target.result;
+                                    } catch (error) {
+                                        console.error('处理图片失败:', error);
+                                        resolve();
+                                    }
+                                };
+                                reader.readAsDataURL(imgData);
+                            });
+                        } catch (error) {
+                            console.error('读取文件失败:', error);
+                        }
+                    }));
+
+                    this.uploadStatus = {
+                        loading: false,
+                        message: `成功解析 ${files.length} 张图片，找到 ${this.scanResults.length} 个有效二维码`,
+                        success: true,
+                        error: false
+                    };
+                    uToast(`成功解析 ${files.length} 张图片，找到 ${this.scanResults.length} 个有效二维码`, {
+                        type: 'success'
+                    });
+
+                } catch (error) {
+                    console.error('处理压缩包失败:', error);
+                    this.uploadStatus = {
+                        loading: false,
+                        message: '处理压缩包失败: ' + error.message,
+                        success: false,
+                        error: true
+                    };
+                    uToast('处理压缩包失败: ' + error.message, {
+                        type: 'error'
+                    });
+                }
+            },
+
+            async startCamera() {
+                if (this.cameraActive) {
+                    this.stopCamera();
+                    return;
+                }
+
+                try {
+                    this.uploadStatus = {
+                        loading: true,
+                        message: '正在打开摄像头...',
+                        success: false,
+                        error: false
+                    };
+
+                    const videoElement = document.getElementById('camera-view');
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        throw new Error('浏览器不支持摄像头访问，请确保使用HTTPS协议或localhost');
+                    }
+                    this.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                    videoElement.srcObject = this.cameraStream;
+                    this.cameraActive = true;
+
+                    videoElement.onloadedmetadata = () => {
+                        videoElement.play();
+                        this.setupCameraScanning(videoElement);
+                    };
+
+                    this.uploadStatus = {
+                        loading: false,
+                        message: '摄像头已打开，将二维码对准摄像头',
+                        success: true,
+                        error: false
+                    };
+                    uToast('摄像头已打开，将二维码对准摄像头');
+
+                } catch (error) {
+                    console.error('打开摄像头失败:', error);
+                    this.uploadStatus = {
+                        loading: false,
+                        message: '打开摄像头失败: ' + error.message,
+                        success: false,
+                        error: true
+                    };
+                    uToast('打开摄像头失败: ' + error.message, {
+                        type: 'error'
+                    });
+                }
+            },
+
+            setupCameraScanning(videoElement) {
+                const self = this;
+                setInterval(async () => {
+                    if (!this.cameraActive) return;
+
+                    try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = videoElement.videoWidth;
+                        canvas.height = videoElement.videoHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                            inversionAttempts: 'alwaysInvert'
+                        });
+
+                        if (code) {
+                            if (!self.scanResults.includes(code.data)) {
+                                self.scanResults.push(code.data);
+                                self.saveToHistory(code.data);
+                                uToast('扫码成功！');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('摄像头扫码失败:', error);
+                    }
+                }, 1000); // 每秒扫描一次
+            },
+
+            stopCamera() {
+                if (this.cameraStream) {
+                    this.cameraStream.getTracks().forEach(track => track.stop());
+                    document.getElementById('camera-view').srcObject = null;
+                    this.cameraStream = null;
+                    this.cameraActive = false;
+                }
+            }
+        },
+        beforeDestroy() {
+            this.stopCamera();
+        }
+    });
+
+    // 初始化 uView 和 navnav+
+    uView.prototype.$u.toast = function(message, options) {
+        uToast(message, options);
+    }
+</script>
+</body>
+</html>

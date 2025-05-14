@@ -471,7 +471,7 @@ CREATE TABLE `sys_menu` (
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
-/*Data for the table `sys_menu` */
+/*Data for the table `sys_menu` */t'c
 
 insert  into `sys_menu`(`id`,`name`,`path`,`icon`,`description`,`pid`,`page_path`,`sort_num`) values 
 (4,'系统管理',NULL,'el-icon-s-grid',NULL,NULL,NULL,700),
@@ -590,3 +590,296 @@ insert  into `sys_user`(`id`,`username`,`password`,`nickname`,`email`,`phone`,`a
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+
+-- Add new tables to smart-agriculture database
+USE `smart-agriculture`;
+
+-- 1. Batch and Traceability Code Table
+CREATE TABLE `batch_trace` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `batch_id` varchar(50) NOT NULL COMMENT '批次编号',
+  `farm_id` int(11) NOT NULL COMMENT '关联农田ID',
+  `crop_id` int(11) NOT NULL COMMENT '作物ID',
+  `trace_code` varchar(50) NOT NULL COMMENT '溯源码',
+  `planting_date` date NOT NULL COMMENT '种植日期',
+  `status` varchar(50) DEFAULT NULL COMMENT '批次状态',
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `trace_code` (`trace_code`),
+  KEY `farm_id` (`farm_id`),
+  CONSTRAINT `batch_trace_ibfk_1` FOREIGN KEY (`farm_id`) REFERENCES `statistic` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2. Crop Growth Timeline Record Table
+CREATE TABLE `crop_growth_timeline` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `batch_id` varchar(50) NOT NULL COMMENT '批次编号',
+  `stage` varchar(50) NOT NULL COMMENT '生长阶段',
+  `start_date` date NOT NULL COMMENT '阶段开始日期',
+  `end_date` date DEFAULT NULL COMMENT '阶段结束日期',
+  `description` text COMMENT '阶段描述',
+  `images` varchar(255) DEFAULT NULL COMMENT '图片记录',
+  PRIMARY KEY (`id`),
+  KEY `batch_id` (`batch_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 3. Harvest Record Table
+CREATE TABLE `harvest_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `batch_id` varchar(50) NOT NULL COMMENT '批次编号',
+  `harvest_date` date NOT NULL COMMENT '收获日期',
+  `quantity` decimal(10,2) NOT NULL COMMENT '收获数量(kg)',
+  `quality_level` varchar(20) DEFAULT NULL COMMENT '质量等级',
+  `operator` varchar(50) DEFAULT NULL COMMENT '操作人',
+  `notes` text COMMENT '备注',
+  `inventory_id` int(11) DEFAULT NULL COMMENT '关联入库记录',
+  PRIMARY KEY (`id`),
+  KEY `batch_id` (`batch_id`),
+  KEY `inventory_id` (`inventory_id`),
+  CONSTRAINT `harvest_record_ibfk_1` FOREIGN KEY (`inventory_id`) REFERENCES `inventory` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4. Fertilizer Information Table
+CREATE TABLE `fertilizer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL COMMENT '肥料名称',
+  `type` varchar(50) NOT NULL COMMENT '肥料类型',
+  `composition` text COMMENT '成分',
+  `usage_guide` text COMMENT '使用指南',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 5. Fertilization Record Table
+CREATE TABLE `fertilization_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `farm_id` int(11) NOT NULL COMMENT '农田ID',
+  `batch_id` varchar(50) NOT NULL COMMENT '批次编号',
+  `fertilizer_id` int(11) NOT NULL COMMENT '肥料ID',
+  `application_date` datetime NOT NULL COMMENT '施肥日期时间',
+  `amount` decimal(10,2) NOT NULL COMMENT '施肥量(kg)',
+  `method` varchar(50) DEFAULT NULL COMMENT '施肥方法',
+  `operator` varchar(50) DEFAULT NULL COMMENT '操作人',
+  `inventory_id` int(11) DEFAULT NULL COMMENT '关联库存记录',
+  `notes` text COMMENT '备注',
+  PRIMARY KEY (`id`),
+  KEY `farm_id` (`farm_id`),
+  KEY `batch_id` (`batch_id`),
+  KEY `inventory_id` (`inventory_id`),
+  KEY `fertilizer_id` (`fertilizer_id`),
+  CONSTRAINT `fertilization_record_ibfk_1` FOREIGN KEY (`farm_id`) REFERENCES `statistic` (`id`),
+  CONSTRAINT `fertilization_record_ibfk_2` FOREIGN KEY (`inventory_id`) REFERENCES `inventory` (`id`),
+  CONSTRAINT `fertilization_record_ibfk_3` FOREIGN KEY (`fertilizer_id`) REFERENCES `fertilizer` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6. Irrigation Record Table
+CREATE TABLE `irrigation_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `farm_id` int(11) NOT NULL COMMENT '农田ID',
+  `batch_id` varchar(50) NOT NULL COMMENT '批次编号',
+  `irrigation_date` datetime NOT NULL COMMENT '浇水日期时间',
+  `water_amount` decimal(10,2) NOT NULL COMMENT '用水量(L)',
+  `duration` int(11) DEFAULT NULL COMMENT '持续时间(分钟)',
+  `method` varchar(50) DEFAULT NULL COMMENT '浇水方法',
+  `operator` varchar(50) DEFAULT NULL COMMENT '操作人',
+  `notes` text COMMENT '备注',
+  PRIMARY KEY (`id`),
+  KEY `farm_id` (`farm_id`),
+  KEY `batch_id` (`batch_id`),
+  CONSTRAINT `irrigation_record_ibfk_1` FOREIGN KEY (`farm_id`) REFERENCES `statistic` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 7. Crop Evaluation Standard Table
+CREATE TABLE `crop_evaluation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `batch_id` varchar(50) NOT NULL COMMENT '批次编号',
+  `harvest_id` int(11) NOT NULL COMMENT '关联收获记录',
+  `yield_per_mu` decimal(10,2) DEFAULT NULL COMMENT '亩产量(kg)',
+  `average_size` decimal(10,2) DEFAULT NULL COMMENT '平均大小(cm)',
+  `weight_per_unit` decimal(10,2) DEFAULT NULL COMMENT '单位重量(g)',
+  `appearance_score` int(11) DEFAULT NULL COMMENT '外观评分(1-10)',
+  `quality_score` int(11) DEFAULT NULL COMMENT '品质评分(1-10)',
+  `moisture_content` decimal(5,2) DEFAULT NULL COMMENT '含水量(%)',
+  `evaluation_date` date NOT NULL COMMENT '评估日期',
+  `evaluator` varchar(50) DEFAULT NULL COMMENT '评估人',
+  PRIMARY KEY (`id`),
+  KEY `batch_id` (`batch_id`),
+  KEY `harvest_id` (`harvest_id`),
+  CONSTRAINT `crop_evaluation_ibfk_1` FOREIGN KEY (`harvest_id`) REFERENCES `harvest_record` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 8. Camera Table
+CREATE TABLE `camera` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `farm_id` int(11) NOT NULL COMMENT '关联农田ID',
+  `name` varchar(100) NOT NULL COMMENT '摄像头名称',
+  `ip_address` varchar(100) NOT NULL COMMENT 'IP地址',
+  `rtsp_url` varchar(255) DEFAULT NULL COMMENT 'RTSP流地址',
+  `username` varchar(50) DEFAULT NULL COMMENT '登录用户名',
+  `password` varchar(50) DEFAULT NULL COMMENT '登录密码',
+  `status` varchar(20) DEFAULT 'offline' COMMENT '状态',
+  `installation_date` date DEFAULT NULL COMMENT '安装日期',
+  `location_description` text COMMENT '位置描述',
+  PRIMARY KEY (`id`),
+  KEY `farm_id` (`farm_id`),
+  CONSTRAINT `camera_ibfk_1` FOREIGN KEY (`farm_id`) REFERENCES `statistic` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 9. Camera Recording Record Table
+CREATE TABLE `camera_recording` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `camera_id` int(11) NOT NULL COMMENT '摄像头ID',
+  `start_time` datetime NOT NULL COMMENT '开始时间',
+  `end_time` datetime DEFAULT NULL COMMENT '结束时间',
+  `file_path` varchar(255) NOT NULL COMMENT '文件路径',
+  `file_size` bigint(20) DEFAULT NULL COMMENT '文件大小(byte)',
+  `duration` int(11) DEFAULT NULL COMMENT '时长(秒)',
+  `storage_status` varchar(20) DEFAULT 'active' COMMENT '存储状态',
+  PRIMARY KEY (`id`),
+  KEY `camera_id` (`camera_id`),
+  CONSTRAINT `camera_recording_ibfk_1` FOREIGN KEY (`camera_id`) REFERENCES `camera` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 10. Farm Environment History Record Table
+CREATE TABLE `farm_environment_history` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `farm_id` int(11) NOT NULL COMMENT '农田ID',
+  `record_time` datetime NOT NULL COMMENT '记录时间',
+  `temperature` decimal(11,1) DEFAULT NULL COMMENT '温度（℃）',
+  `air_humidity` int(11) DEFAULT NULL COMMENT '空气湿度（%）',
+  `soil_humidity` int(11) DEFAULT NULL COMMENT '土壤湿度（%）',
+  `carbon` int(11) DEFAULT NULL COMMENT 'CO2含量ppm',
+  `ph` decimal(11,2) DEFAULT NULL COMMENT '土壤PH值',
+  `light` int(11) DEFAULT NULL COMMENT '光照强度(lux)',
+  `filllight_status` varchar(50) DEFAULT NULL COMMENT '补光灯状态',
+  `pump_status` varchar(50) DEFAULT NULL COMMENT '水泵状态',
+  PRIMARY KEY (`id`),
+  KEY `farm_id` (`farm_id`),
+  KEY `record_time` (`record_time`),
+  CONSTRAINT `farm_environment_history_ibfk_1` FOREIGN KEY (`farm_id`) REFERENCES `statistic` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert sample data
+
+-- First ensure we have some sample data in the statistic table
+INSERT INTO `statistic` (`id`, `farm`, `area`, `address`, `crop`, `number`, `state`, `temperature`, `airhumidity`, `soilhumidity`, `carbon`, `ph`, `light`, `filllight`, `monitor`, `pump`, `keeper`) VALUES
+(1, '东区农田A', 500, '青岛市城阳区春阳路1号', '小麦', 10000, '生长期', 22.5, 65, 70, 450, 6.8, 5000, '关闭', '在线', '关闭', '张三'),
+(2, '西区农田B', 600, '青岛市城阳区春阳路2号', '玉米', 8000, '成熟期', 24.0, 60, 65, 430, 7.2, 5500, '关闭', '在线', '打开', '李四'),
+(3, '南区农田C', 450, '青岛市城阳区春阳路3号', '大豆', 9000, '播种期', 21.0, 70, 75, 460, 6.5, 4800, '打开', '在线', '关闭', '王五');
+
+-- Insert sample data into inventory table if not exists
+INSERT INTO `inventory` (`id`, `produce`, `warehouse`, `region`, `number`, `keeper`, `remark`) VALUES
+(1, '小麦种子', '中央仓库', 'A区', 500, '赵六', '优质种子'),
+(2, '玉米种子', '中央仓库', 'B区', 400, '赵六', '新品种'),
+(3, '有机肥', '东区仓库', 'C区', 1000, '钱七', '有机认证'),
+(4, '氮肥', '西区仓库', 'A区', 800, '孙八', '高氮含量'),
+(5, '农药', '南区仓库', 'B区', 300, '周九', '低毒');
+
+-- 1. Insert data into batch_trace
+INSERT INTO `batch_trace` (`batch_id`, `farm_id`, `crop_id`, `trace_code`, `planting_date`, `status`, `create_time`) VALUES
+('2025-XM-001', 1, 1, 'TR2025001XM', '2025-03-15', '生长中', '2025-03-15 08:00:00'),
+('2025-YM-001', 2, 2, 'TR2025001YM', '2025-03-20', '生长中', '2025-03-20 09:30:00'),
+('2025-DD-001', 3, 3, 'TR2025001DD', '2025-03-25', '播种', '2025-03-25 10:15:00');
+
+-- 2. Insert data into crop_growth_timeline
+INSERT INTO `crop_growth_timeline` (`batch_id`, `stage`, `start_date`, `end_date`, `description`, `images`) VALUES
+('2025-XM-001', '播种期', '2025-03-15', '2025-03-25', '完成小麦播种工作，土壤湿度良好', '/images/wheat/seed-20250315.jpg'),
+('2025-XM-001', '出苗期', '2025-03-26', '2025-04-10', '小麦幼苗长势良好，高度平均2cm', '/images/wheat/seedling-20250326.jpg'),
+('2025-YM-001', '播种期', '2025-03-20', '2025-04-01', '玉米播种完成，使用新型播种机', '/images/corn/seed-20250320.jpg'),
+('2025-YM-001', '出苗期', '2025-04-02', '2025-04-15', '玉米出苗率95%，生长状态良好', '/images/corn/seedling-20250402.jpg'),
+('2025-DD-001', '播种期', '2025-03-25', '2025-04-05', '大豆播种，使用有机肥', '/images/soybean/seed-20250325.jpg');
+
+-- 3. Insert data into fertilizer
+INSERT INTO `fertilizer` (`name`, `type`, `composition`, `usage_guide`) VALUES
+('有机复合肥', '有机肥', '氮5%、磷3%、钾4%、有机质40%', '每亩使用20-30公斤，播种前施入土壤'),
+('尿素', '氮肥', '氮含量46%', '每亩使用10-15公斤，追肥使用'),
+('磷酸二铵', '磷肥', '氮18%、磷46%', '每亩使用15-20公斤，基肥使用'),
+('硫酸钾', '钾肥', '钾含量50%、硫18%', '每亩使用10-12公斤，追肥使用');
+
+-- 4. Insert data into fertilization_record
+INSERT INTO `fertilization_record` (`farm_id`, `batch_id`, `fertilizer_id`, `application_date`, `amount`, `method`, `operator`, `inventory_id`, `notes`) VALUES
+(1, '2025-XM-001', 1, '2025-03-14 08:30:00', 120.00, '机械撒施', '张三', 3, '播种前基肥施用'),
+(1, '2025-XM-001', 2, '2025-04-01 09:15:00', 60.00, '机械撒施', '张三', 4, '苗期追肥'),
+(2, '2025-YM-001', 1, '2025-03-19 07:45:00', 150.00, '机械撒施', '李四', 3, '播种前基肥施用'),
+(2, '2025-YM-001', 3, '2025-04-05 08:00:00', 70.00, '机械撒施', '李四', 4, '苗期追肥'),
+(3, '2025-DD-001', 1, '2025-03-24 10:00:00', 100.00, '机械撒施', '王五', 3, '播种前基肥施用');
+
+-- 5. Insert data into irrigation_record
+INSERT INTO `irrigation_record` (`farm_id`, `batch_id`, `irrigation_date`, `water_amount`, `duration`, `method`, `operator`, `notes`) VALUES
+(1, '2025-XM-001', '2025-03-16 07:00:00', 25000.00, 120, '喷灌', '张三', '播种后灌水'),
+(1, '2025-XM-001', '2025-04-02 06:30:00', 20000.00, 100, '喷灌', '张三', '苗期灌水'),
+(2, '2025-YM-001', '2025-03-21 07:30:00', 30000.00, 150, '滴灌', '李四', '播种后灌水'),
+(2, '2025-YM-001', '2025-04-06 06:45:00', 25000.00, 120, '滴灌', '李四', '苗期灌水'),
+(3, '2025-DD-001', '2025-03-26 08:00:00', 22000.00, 110, '喷灌', '王五', '播种后灌水');
+
+-- 6. Insert data into harvest_record
+INSERT INTO `harvest_record` (`batch_id`, `harvest_date`, `quantity`, `quality_level`, `operator`, `notes`, `inventory_id`) VALUES
+('2025-XM-001', '2025-04-20', 3500.00, 'A', '张三', '小麦试验收获', 1);
+
+-- 7. Insert data into crop_evaluation
+INSERT INTO `crop_evaluation` (`batch_id`, `harvest_id`, `yield_per_mu`, `average_size`, `weight_per_unit`, `appearance_score`, `quality_score`, `moisture_content`, `evaluation_date`, `evaluator`) VALUES
+('2025-XM-001', 1, 450.00, NULL, 42.50, 9, 8, 14.50, '2025-04-21', '李四');
+
+-- 8. Insert data into camera
+INSERT INTO `camera` (`farm_id`, `name`, `ip_address`, `rtsp_url`, `username`, `password`, `status`, `installation_date`, `location_description`) VALUES
+(1, '东区农田A摄像头', '192.168.1.101', 'rtsp://192.168.1.101:554/stream1', 'admin', 'admin123', 'online', '2025-03-01', '农田东北角高杆'),
+(2, '西区农田B摄像头', '192.168.1.102', 'rtsp://192.168.1.102:554/stream1', 'admin', 'admin123', 'online', '2025-03-02', '农田西南角高杆'),
+(3, '南区农田C摄像头', '192.168.1.103', 'rtsp://192.168.1.103:554/stream1', 'admin', 'admin123', 'online', '2025-03-03', '农田中央高杆');
+
+-- 9. Insert data into camera_recording
+INSERT INTO `camera_recording` (`camera_id`, `start_time`, `end_time`, `file_path`, `file_size`, `duration`, `storage_status`) VALUES
+(1, '2025-04-01 00:00:00', '2025-04-01 23:59:59', '/recordings/farm1/20250401.mp4', 1524000000, 86400, 'active'),
+(1, '2025-04-02 00:00:00', '2025-04-02 23:59:59', '/recordings/farm1/20250402.mp4', 1486000000, 86400, 'active'),
+(2, '2025-04-01 00:00:00', '2025-04-01 23:59:59', '/recordings/farm2/20250401.mp4', 1510000000, 86400, 'active'),
+(2, '2025-04-02 00:00:00', '2025-04-02 23:59:59', '/recordings/farm2/20250402.mp4', 1498000000, 86400, 'active'),
+(3, '2025-04-01 00:00:00', '2025-04-01 23:59:59', '/recordings/farm3/20250401.mp4', 1512000000, 86400, 'active');
+
+-- 10. Insert data into farm_environment_history
+INSERT INTO `farm_environment_history` (`farm_id`, `record_time`, `temperature`, `air_humidity`, `soil_humidity`, `carbon`, `ph`, `light`, `filllight_status`, `pump_status`) VALUES
+(1, '2025-04-01 08:00:00', 18.5, 65, 70, 450, 6.8, 5200, '关闭', '关闭'),
+(1, '2025-04-01 14:00:00', 24.3, 55, 68, 430, 6.8, 8500, '关闭', '关闭'),
+(1, '2025-04-01 20:00:00', 16.8, 72, 70, 470, 6.7, 200, '打开', '关闭'),
+(2, '2025-04-01 08:00:00', 17.9, 68, 65, 440, 7.2, 5100, '关闭', '关闭'),
+(2, '2025-04-01 14:00:00', 25.1, 52, 62, 420, 7.2, 8600, '关闭', '打开'),
+(2, '2025-04-01 20:00:00', 17.2, 70, 68, 460, 7.1, 180, '打开', '关闭'),
+(3, '2025-04-01 08:00:00', 18.2, 69, 75, 455, 6.5, 5000, '关闭', '关闭'),
+(3, '2025-04-01 14:00:00', 23.8, 58, 72, 435, 6.5, 8300, '关闭', '关闭'),
+(3, '2025-04-01 20:00:00', 16.5, 75, 74, 465, 6.4, 190, '打开', '关闭');
+
+-- Add Nutrition Composition Table to smart-agriculture database
+USE `smart-agriculture`;
+
+-- Create Nutrition Composition Table
+CREATE TABLE `nutrition_composition` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `batch_id` varchar(50) NOT NULL COMMENT '批次编号',
+  `harvest_id` int(11) NOT NULL COMMENT '关联收获记录ID',
+  `test_date` date NOT NULL COMMENT '测试日期',
+  `protein` decimal(5,2) DEFAULT NULL COMMENT '蛋白质含量(%)',
+  `fat` decimal(5,2) DEFAULT NULL COMMENT '脂肪含量(%)',
+  `carbohydrate` decimal(5,2) DEFAULT NULL COMMENT '碳水化合物含量(%)',
+  `fiber` decimal(5,2) DEFAULT NULL COMMENT '纤维素含量(%)',
+  `vitamin_a` decimal(8,2) DEFAULT NULL COMMENT '维生素A含量(μg/100g)',
+  `vitamin_c` decimal(8,2) DEFAULT NULL COMMENT '维生素C含量(mg/100g)',
+  `vitamin_e` decimal(8,2) DEFAULT NULL COMMENT '维生素E含量(mg/100g)',
+  `calcium` decimal(8,2) DEFAULT NULL COMMENT '钙含量(mg/100g)',
+  `iron` decimal(8,2) DEFAULT NULL COMMENT '铁含量(mg/100g)',
+  `zinc` decimal(8,2) DEFAULT NULL COMMENT '锌含量(mg/100g)',
+  `selenium` decimal(8,2) DEFAULT NULL COMMENT '硒含量(μg/100g)',
+  `antioxidant` decimal(8,2) DEFAULT NULL COMMENT '抗氧化物含量(mg/100g)',
+  `moisture` decimal(5,2) DEFAULT NULL COMMENT '水分含量(%)',
+  `energy` decimal(8,2) DEFAULT NULL COMMENT '能量(kcal/100g)',
+  `tester` varchar(50) DEFAULT NULL COMMENT '测试人员',
+  `test_method` varchar(100) DEFAULT NULL COMMENT '测试方法',
+  `test_equipment` varchar(100) DEFAULT NULL COMMENT '测试设备',
+  `notes` text COMMENT '备注',
+  PRIMARY KEY (`id`),
+  KEY `batch_id` (`batch_id`),
+  KEY `harvest_id` (`harvest_id`),
+  CONSTRAINT `nutrition_composition_ibfk_1` FOREIGN KEY (`harvest_id`) REFERENCES `harvest_record` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert sample data into nutrition_composition
+INSERT INTO `nutrition_composition` (`batch_id`, `harvest_id`, `test_date`, `protein`, `fat`, `carbohydrate`, `fiber`, `vitamin_a`, `vitamin_c`, `vitamin_e`, `calcium`, `iron`, `zinc`, `selenium`, `antioxidant`, `moisture`, `energy`, `tester`, `test_method`, `test_equipment`, `notes`) VALUES
+('2025-XM-001', 1, '2025-04-22', 12.60, 1.80, 71.20, 2.70, 0.00, 0.00, 1.20, 34.00, 3.60, 2.80, 40.30, 1.50, 14.50, 346.00, '王红', 'AOAC标准方法', 'SimMark营养分析仪S2000', '粒质饱满，品质优良'),
+('2025-XM-001', 1, '2025-04-23', 12.45, 1.75, 71.40, 2.65, 0.00, 0.00, 1.18, 33.50, 3.55, 2.75, 40.00, 1.45, 14.62, 345.50, '李明', '近红外光谱法', 'NIR光谱分析仪A100', '复验样本，结果稳定');

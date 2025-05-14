@@ -2,7 +2,6 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import store from "@/store";
 
-
 Vue.use(VueRouter)
 
 const routes = [
@@ -15,6 +14,12 @@ const routes = [
     path: '/code',
     name: 'Code',
     component: () => import('../views/code.vue')
+  },
+
+  {
+    path: '/product',
+    name: 'Product',
+    component: () => import('../views/product.vue')
   },
   {
     path: '/verify',

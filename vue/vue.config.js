@@ -41,7 +41,7 @@ module.exports = {
     code: {
       entry: 'src/main.js',
       template: 'public/index.html',
-      filename: 'code.html',
+      filename: 'index.html',
       title: '智慧农场溯源系统'
     },
     verify: {

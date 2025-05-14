@@ -206,6 +206,9 @@
     </style>
 </head>
 <body class="safe-area" style="max-width: 414px; margin: 0 auto; position: relative; min-height: 100vh;">
+    <!-- 引入统一顶部导航栏 -->
+    <div id="header-container"></div>
+
     <!-- 通知提示 -->
     <div class="notification" id="notification">
         <div class="flex items-center">
@@ -215,37 +218,6 @@
             <span id="notification-text">数据已更新</span>
         </div>
     </div>
-
-    <!-- 顶部导航栏 -->
-    <header class="sticky top-0 bg-white shadow-sm z-10">
-        <div class="flex items-center justify-between px-4 py-3">
-            <div class="flex items-center">
-                <a href="index.html" class="mr-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </a>
-                <h1 class="text-lg font-bold">数据分析</h1>
-            </div>
-            <div class="flex space-x-2">
-                <button class="p-2 rounded-full bg-gray-100" id="refresh-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                </button>
-                <button class="p-2 rounded-full bg-gray-100" id="share-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                </button>
-                <button class="p-2 rounded-full bg-gray-100" id="settings-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </header>
 
     <!-- 主要内容区域 -->
     <main class="pb-16">
@@ -436,3 +408,141 @@
                         <text x="5" y="40" font-size="10" fill="#6b7280">30°C</text>
                         <text x="5" y="80" font-size="10" fill="#6b7280">25°C</text>
                         <text x="5" y="120" font-size="10" fill="#6b7280">20°C</text>
+                        <text x="5" y="160" font-size="10" fill="#6b7280">15°C</text>
+                    </svg>
+                </div>
+                
+                <!-- 图表图例 -->
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #07c160;"></div>
+                        <span>温度</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 引入统一底部导航栏 -->
+    <div id="footer-container"></div>
+    
+    <!-- JavaScript -->
+    <script src="js/unified-app.js"></script>
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载统一头部和底部
+            fetch('components/unified-header.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('header-container').innerHTML = data;
+                });
+            
+            fetch('components/unified-footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('footer-container').innerHTML = data;
+                });
+            
+            // 通知提示
+            const notification = document.getElementById('notification');
+            setTimeout(() => {
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }, 1000);
+            
+            // 刷新按钮
+            document.getElementById('refresh-btn').addEventListener('click', function() {
+                notification.querySelector('#notification-text').textContent = '数据刷新中...';
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.querySelector('#notification-text').textContent = '数据已更新';
+                    setTimeout(() => {
+                        notification.classList.remove('show');
+                    }, 2000);
+                }, 1500);
+            });
+            
+            // 分享按钮
+            document.getElementById('share-btn').addEventListener('click', function() {
+                alert('分享功能即将上线');
+            });
+            
+            // 设置按钮
+            document.getElementById('settings-btn').addEventListener('click', function() {
+                alert('设置功能即将上线');
+            });
+            
+            // 日期范围选择器
+            const dateRangeSelector = document.getElementById('date-range-selector');
+            const dateRangeDropdown = document.getElementById('date-range-dropdown');
+            const customDateRange = document.getElementById('custom-date-range');
+            
+            dateRangeSelector.addEventListener('click', function() {
+                dateRangeDropdown.classList.toggle('show');
+            });
+            
+            // 日期选项点击
+            document.querySelectorAll('.date-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    document.getElementById('selected-date-range').textContent = this.textContent;
+                    
+                    // 如果是自定义范围，显示日期输入框
+                    if (value === 'custom') {
+                        customDateRange.classList.toggle('hidden');
+                    } else {
+                        customDateRange.classList.add('hidden');
+                    }
+                    
+                    // 更新活动状态
+                    document.querySelectorAll('.date-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // 隐藏下拉菜单
+                    dateRangeDropdown.classList.remove('show');
+                });
+            });
+            
+            // 应用筛选按钮
+            document.getElementById('apply-filter-btn').addEventListener('click', function() {
+                alert('筛选条件已应用');
+            });
+            
+            // 图表标签切换
+            document.getElementById('temp-tab').addEventListener('click', function() {
+                document.querySelectorAll('.tab-active').forEach(tab => {
+                    tab.classList.remove('tab-active');
+                });
+                this.classList.add('tab-active');
+            });
+            
+            document.getElementById('humidity-tab').addEventListener('click', function() {
+                document.querySelectorAll('.tab-active').forEach(tab => {
+                    tab.classList.remove('tab-active');
+                });
+                this.classList.add('tab-active');
+            });
+            
+            document.getElementById('light-tab').addEventListener('click', function() {
+                document.querySelectorAll('.tab-active').forEach(tab => {
+                    tab.classList.remove('tab-active');
+                });
+                this.classList.add('tab-active');
+            });
+            
+            document.getElementById('water-tab').addEventListener('click', function() {
+                document.querySelectorAll('.tab-active').forEach(tab => {
+                    tab.classList.remove('tab-active');
+                });
+                this.classList.add('tab-active');
+            });
+        });
+    </script>
+</body>
+</html>

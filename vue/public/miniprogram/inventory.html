@@ -7,6 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <script src="components/unified-header.html"></script>
+    <script src="components/unified-footer.html"></script>
     <style>
         /* 页面特定样式 */
         .tab-active {
@@ -193,37 +195,14 @@
     </style>
 </head>
 <body class="safe-area" style="max-width: 414px; margin: 0 auto; position: relative; min-height: 100vh;">
-    <!-- 顶部导航栏 -->
-    <header class="sticky top-0 bg-white shadow-sm z-10">
-        <div class="flex items-center justify-between px-4 py-3">
-            <div class="flex items-center">
-                <a href="index.html" class="mr-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </a>
-                <h1 class="text-lg font-bold">物资管理</h1>
-            </div>
-            <div class="flex space-x-2">
-                <button class="p-2 rounded-full bg-gray-100" id="scan-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 6h1m-7 7v1m-6-6H4" />
-                    </svg>
-                </button>
-                <button class="p-2 rounded-full bg-gray-100" id="notification-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </header>
+    <!-- 引入统一顶部导航栏 -->
+    <div id="header-container"></div>
 
     <!-- 通知提示 -->
     <div class="notification" id="notification-popup">
         <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
             <span id="notification-text">操作成功</span>
         </div>
@@ -240,7 +219,7 @@
             </div>
         </div>
 
-        <!-- 搜索栏 -->
+        <!-- 搜索框 -->
         <div class="p-4 bg-white border-b">
             <div class="relative">
                 <input type="text" class="w-full p-2 pl-10 pr-4 border border-gray-300 rounded-lg search-input" placeholder="搜索物资名称、编号" id="search-input">
@@ -250,7 +229,7 @@
                     </svg>
                 </div>
                 <button class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400" id="clear-search">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
@@ -262,7 +241,7 @@
             <div class="flex justify-between items-center mb-3">
                 <h2 class="text-lg font-bold">库存概览</h2>
                 <button class="text-sm text-green-600 flex items-center" id="refresh-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                     刷新
@@ -320,7 +299,7 @@
             <div class="bg-white rounded-lg shadow divide-y">
                 <div class="p-3 flex items-center">
                     <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                     </div>
@@ -338,7 +317,7 @@
                 </div>
                 <div class="p-3 flex items-center">
                     <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                     </div>
@@ -356,7 +335,7 @@
                 </div>
                 <div class="p-3 flex items-center">
                     <div class="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                     </div>
@@ -380,7 +359,7 @@
             <div class="flex justify-between items-center mb-3">
                 <h2 class="text-lg font-bold">库存列表</h2>
                 <button class="px-3 py-1 text-sm bg-green-500 text-white rounded-lg flex items-center" id="add-inventory-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
                     添加物资
@@ -403,7 +382,7 @@
                 <div class="divide-y">
                     <div class="p-3 flex items-center inventory-card">
                         <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center mr-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                             </svg>
                         </div>
@@ -427,7 +406,7 @@
                     </div>
                     <div class="p-3 flex items-center inventory-card">
                         <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                             </svg>
                         </div>
@@ -451,27 +430,94 @@
                     </div>
                     <div class="p-3 flex items-center inventory-card">
                         <div class="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center mr-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012 2v2.945"></path>
-            </svg>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <h3 class="font-medium">稻种</h3>
+                                <span class="ml-2 badge badge-yellow">种子</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">编号: S-2023-003</span>
+                                <span class="text-sm status-medium">接近警戒线</span>
+                            </div>
+                            <div class="mt-1 progress-bar">
+                                <div class="progress-value progress-value-medium" style="width: 35%"></div>
+                            </div>
+                        </div>
+                        <div class="text-right ml-3">
+                            <div class="font-medium">15包</div>
+                            <div class="text-sm text-gray-500">¥1,200</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
-    <!-- 引入底部导航栏组件 -->
-    <div id="footer-nav-container"></div>
+    <!-- 引入统一底部导航栏 -->
+    <div id="footer-container"></div>
     
+    <script src="js/unified-app.js"></script>
     <script>
-        // 加载底部导航栏组件
+        // 页面加载完成后执行
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('components/footer-nav.html')
+            // 加载统一头部
+            fetch('components/unified-header.html')
                 .then(response => response.text())
                 .then(data => {
-                    document.getElementById('footer-nav-container').innerHTML = data;
+                    document.getElementById('header-container').innerHTML = data;
                 });
+            
+            // 加载统一底部
+            fetch('components/unified-footer.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('footer-container').innerHTML = data;
+                });
+            
+            // 设置页面标题
+            document.getElementById('page-title').textContent = '物资管理';
+            
+            // 根据当前页面URL设置活动导航项
+            const currentPath = window.location.pathname;
+            const filename = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+            
+            // 移除所有导航项的active类
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.nav-icon').classList.remove('text-green-500');
+                item.querySelector('span').classList.remove('text-green-500');
+            });
+            
+            // 根据当前页面设置活动导航项
+            let activeNavId = null;
+            
+            if (filename === 'home.html' || filename === '') {
+                activeNavId = 'nav-home';
+            } else if (filename.includes('farm-monitor') || filename.includes('farm-video-monitor')) {
+                activeNavId = 'nav-monitor';
+            } else if (filename.includes('task')) {
+                activeNavId = 'nav-task';
+            } else if (filename.includes('data-analysis')) {
+                activeNavId = 'nav-analysis';
+            } else if (filename.includes('inventory')) {
+                activeNavId = 'nav-task'; // 假设物资管理属于任务类别
+            } else if (filename.includes('profile')) {
+                activeNavId = 'nav-profile';
+            }
+            
+            if (activeNavId) {
+                const activeNav = document.getElementById(activeNavId);
+                if (activeNav) {
+                    activeNav.classList.add('active');
+                    activeNav.querySelector('.nav-icon').classList.add('text-green-500');
+                    activeNav.querySelector('span').classList.add('text-green-500');
+                }
+            }
         });
     </script>
-    
-    <!-- 引入交互脚本 -->
-    <script src="js/app.js"></script>
 </body>
 </html>
